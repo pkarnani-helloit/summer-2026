@@ -359,8 +359,64 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
 </div>
 
 </div>
-<script>
-const DB={get(k){try{return JSON.parse(localStorage.getItem('s26_'+k))}catch{return null}},set(k,v){localStorage.setItem('s26_'+k,JSON.stringify(v))}};
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDP5lX6O8bfJtBQ4LsgWT0Bp-KAkuBoI8I",
+  authDomain: "summertoremember-50cf6.firebaseapp.com",
+  projectId: "summertoremember-50cf6",
+  storageBucket: "summertoremember-50cf6.firebasestorage.app",
+  messagingSenderId: "827543845951",
+  appId: "1:827543845951:web:7323e51b30a35b882b0c8a",
+  measurementId: "G-SJJ9019RNY"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+// ── In-memory cache (loaded from Firestore on login) ──────────
+const CACHE = {};
+let feedCache = [];
+let feedUnsub = null;
+let welcomeChecked = false;
+
+function defaultProfile(id){
+  return {id,points:0,badges:[],goals:{},completedCats:{},recipes:0,books:0,workouts:0,screenFree:0,irl:0,sibTime:0,wellness:0,earned:0,customLogs:0,maxStreak:0,curStreak:0,avatar:'😎',avSet:false,lastActivityDate:'',pin:'',pinSet:false};
+}
+async function loadProfile(pid){
+  if(CACHE[pid]) return CACHE[pid];
+  const snap=await getDoc(doc(db,'profiles',pid));
+  CACHE[pid]=snap.exists()?snap.data():defaultProfile(pid);
+  return CACHE[pid];
+}
+async function forceLoadProfile(pid){
+  const snap=await getDoc(doc(db,'profiles',pid));
+  CACHE[pid]=snap.exists()?snap.data():defaultProfile(pid);
+  return CACHE[pid];
+}
+function getPD(id){return CACHE[id]||defaultProfile(id);}
+function savePD(d){CACHE[d.id]={...d};setDoc(doc(db,'profiles',d.id),d).catch(console.error);}
+
+// ── Feed ──────────────────────────────────────────────────────
+function getFeed(){return feedCache;}
+function addFeedPost(post){return addDoc(collection(db,'feed'),post).catch(console.error);}
+function updateFeedPost(id,data){return updateDoc(doc(db,'feed',id),data).catch(console.error);}
+function subscribeFeed(){
+  if(feedUnsub)feedUnsub();
+  const q=query(collection(db,'feed'),orderBy('ts','desc'),limit(200));
+  feedUnsub=onSnapshot(q,snap=>{
+    feedCache=snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(!welcomeChecked){
+      welcomeChecked=true;
+      if(feedCache.length===0) addFeedPost({aid:'papa',txt:"Happy Father's Day! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]});
+    }
+    renderFeed();
+    if(document.getElementById('s-papa')?.classList.contains('active')) renderPapa();
+  });
+}
 const PROFS=[{id:'malina',name:'Malina',age:17},{id:'sasha',name:'Sasha',age:15},{id:'sam',name:'Sam',age:12}];
 
 const NOTES={
@@ -547,10 +603,6 @@ function celebrate(ico,lbl,desc){
   document.getElementById('celsub').textContent=desc;
   document.getElementById('cel').style.display='flex';
 }
-function getPD(id){return DB.get('p_'+id)||{id,points:0,badges:[],goals:{},completedCats:{},recipes:0,books:0,workouts:0,screenFree:0,irl:0,sibTime:0,wellness:0,earned:0,maxStreak:0,curStreak:0,avatar:'😎',avSet:false,lastActivityDate:''}}
-function savePD(d){DB.set('p_'+d.id,d)}
-function getFeed(){return DB.get('feed')||[]}
-function saveFeed(f){DB.set('feed',f.slice(0,200))}
 function addPts(d,pts,why){d.points=(d.points||0)+pts;toast('+'+pts+' pts  '+why);chkBadges(d)}
 function chkBadges(d){
   const prev=new Set(d.badges||[]);
@@ -558,7 +610,7 @@ function chkBadges(d){
     if(!prev.has(b.id)&&b.chk(d)){
       d.badges=[...(d.badges||[]),b.id];
       const bi=b;setTimeout(()=>celebrate(bi.ico,bi.lbl,bi.desc),600);
-      const f=getFeed();f.unshift({id:Date.now()+'b',aid:d.id,txt:'earned the "'+b.lbl+'" badge '+b.ico,ts:new Date().toISOString(),rx:[]});saveFeed(f);
+      addFeedPost({aid:d.id,txt:'earned the "'+b.lbl+'" badge '+b.ico,ts:new Date().toISOString(),rx:[]});
     }
   });
 }
@@ -573,7 +625,9 @@ function bumpActivity(d){
 }
 
 // WHO
-function renderWho(){
+async function renderWho(){
+  document.getElementById('whocards').innerHTML='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Loading...</div>';
+  await Promise.all(PROFS.map(p=>loadProfile(p.id)));
   const w=document.getElementById('whocards');w.innerHTML='';
   PROFS.forEach(p=>{
     const d=getPD(p.id),filled=Object.keys(d.goals||{}).length,done=Object.keys(d.completedCats||{}).length;
@@ -583,16 +637,15 @@ function renderWho(){
     w.appendChild(el);
   });
 }
-function pickKid(pid){
-  // If no profile is active yet, entering your own profile - prompt for PIN
+async function pickKid(pid){
+  toast('Loading...');
+  await loadProfile(pid);
   const d=getPD(pid);
   if(!d.pinSet){
-    // First time - set your PIN
     CUR=PROFS.find(p=>p.id===pid);
     if(!d.avSet){renderAvGrid();ss('s-avatar')}else{showSetPin(pid);}
     return;
   }
-  // Already have a PIN - ask for it
   showEnterPin(pid);
 }
 
@@ -802,7 +855,7 @@ function saveGoal(){
   d.goals=d.goals||{};d.goals[CURCAT.id]=result;
   if(isNew){addPts(d,50,'Goal set: '+CURCAT.lbl);}
   bumpActivity(d);savePD(d);chkBadges(d);
-  if(isNew){const f=getFeed();f.unshift({id:Date.now()+'g',aid:CUR.id,txt:'set a new goal: '+CURCAT.ico+' '+CURCAT.lbl,ts:new Date().toISOString(),rx:[]});saveFeed(f);}
+  if(isNew) addFeedPost({aid:CUR.id,txt:'set a new goal: '+CURCAT.ico+' '+CURCAT.lbl,ts:new Date().toISOString(),rx:[]});
   toast(CURCAT.ico+' Saved!');
   ss('s-main');tabt('summer',document.getElementById('nav-summer'));renderDash();
 }
@@ -817,7 +870,7 @@ function completeGoal(catId,ownerId){
   if(!d.completedCats?.[catId]){
     d.completedCats=d.completedCats||{};d.completedCats[catId]=new Date().toISOString();
     bumpActivity(d);addPts(d,100,'Completed: '+cat.lbl);savePD(d);
-    const f=getFeed();f.unshift({id:Date.now()+'cc',aid:CUR.id,txt:'completed their '+cat.ico+' '+cat.lbl+' goal!',ts:new Date().toISOString(),rx:[]});saveFeed(f);
+    addFeedPost({aid:CUR.id,txt:'completed their '+cat.ico+' '+cat.lbl+' goal!',ts:new Date().toISOString(),rx:[]});
     chkBadges(d);renderDash();
   }
 }
@@ -869,8 +922,11 @@ function renderFeed(){
 function addRx(id){
   const stickers=['🔥','❤️','💪','👏','🏆','✨','😂'];
   const s=stickers[Math.floor(Math.random()*stickers.length)];
-  const f=getFeed(),item=f.find(x=>x.id===id);
-  if(item){item.rx=[...(item.rx||[]),{s,aid:CUR?.id}];saveFeed(f);if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Reacted');savePD(d)}renderFeed();}
+  const item=feedCache.find(x=>x.id===id);
+  if(item){
+    updateFeedPost(id,{rx:[...(item.rx||[]),{s,aid:CUR?.id}]});
+    if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Reacted');savePD(d);}
+  }
 }
 function toggleComment(fid){
   const box=document.getElementById('cb-'+fid);
@@ -880,12 +936,11 @@ function submitComment(fid){
   const inp=document.querySelector(`.comment-inp[data-fid="${fid}"]`);
   if(!inp)return;
   const txt=inp.value.trim();if(!txt)return;
-  const f=getFeed(),item=f.find(x=>x.id===fid);
+  const item=feedCache.find(x=>x.id===fid);
   if(item){
-    item.rx=[...(item.rx||[]),{comment:sanitize(txt),aid:CUR?.id,ts:new Date().toISOString()}];
-    saveFeed(f);inp.value='';
-    if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Left a comment');savePD(d)}
-    renderFeed();
+    updateFeedPost(fid,{rx:[...(item.rx||[]),{comment:sanitize(txt),aid:CUR?.id,ts:new Date().toISOString()}]});
+    inp.value='';
+    if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Left a comment');savePD(d);}
   }
 }
 function openpost(){document.getElementById('postmodal').style.display='flex'}
@@ -893,11 +948,10 @@ function closepost(){document.getElementById('postmodal').style.display='none'}
 function pickst(el,s){STICKER=s;document.querySelectorAll('.stopt').forEach(x=>x.classList.remove('on'));el.classList.add('on')}
 function sanitize(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,300)}
 function submitpost(){
-  const raw=document.getElementById('posttxt').value.trim();if(!raw){toast('Write something first');return}
-  const txt=sanitize(raw);
-  const f=getFeed();f.unshift({id:Date.now()+'p',aid:CUR.id,txt:txt+' '+STICKER,ts:new Date().toISOString(),rx:[]});saveFeed(f);
+  const raw=document.getElementById('posttxt').value.trim();if(!raw){toast('Write something first');return;}
+  addFeedPost({aid:CUR.id,txt:sanitize(raw)+' '+STICKER,ts:new Date().toISOString(),rx:[]});
   const d=getPD(CUR.id);bumpActivity(d);addPts(d,5,'Shared a moment');savePD(d);
-  document.getElementById('posttxt').value='';closepost();renderFeed();
+  document.getElementById('posttxt').value='';closepost();
 }
 
 // PAPA
@@ -906,7 +960,8 @@ function paplogin(){
   if(document.getElementById('papainp').value.trim().toUpperCase()==='KARNANI26'){ss('s-papa');renderPapa();}
   else toast('Wrong code. Hint: KARNANI26');
 }
-function renderPapa(){
+async function renderPapa(){
+  await Promise.all(PROFS.map(p=>forceLoadProfile(p.id)));
   document.getElementById('papadays').textContent=dl();
   let tp=0,tb=0,tg=0;
   PROFS.forEach(p=>{const d=getPD(p.id);tp+=d.points||0;tb+=(d.badges||[]).length;tg+=Object.keys(d.completedCats||{}).length});
@@ -931,7 +986,11 @@ function renderPapa(){
 
 // EVENTS
 document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('kidsBtn').addEventListener('click',()=>{ss('s-who');renderWho()});
+  signInAnonymously(auth)
+    .then(()=>subscribeFeed())
+    .catch(err=>{console.error(err);toast('Connection error — check your internet');});
+
+  document.getElementById('kidsBtn').addEventListener('click',async()=>{ss('s-who');await renderWho()});
   document.getElementById('papaBtn').addEventListener('click',()=>ss('s-papa-login'));
   document.getElementById('whoBack').addEventListener('click',()=>ss('s-land'));
   document.getElementById('avConfirmBtn').addEventListener('click',confirmav);
@@ -980,11 +1039,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('pin-input').value='';
     document.getElementById('pin-error').textContent='';
   });
-  renderWho();
-  if(!DB.get('welcomed')){
-    saveFeed([{id:'w0',aid:'papa',txt:"Happy Father's Day! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]}]);
-    DB.set('welcomed',true);
-  }
 });
 </script>
 </body>
