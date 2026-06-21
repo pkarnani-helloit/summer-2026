@@ -1073,12 +1073,51 @@ async function renderPapa(){
     `<div class="statbox"><div class="statval" style="color:var(--gold)">${tb}</div><div class="statlbl">Badges</div></div>`+
     `<div class="statbox"><div class="statval" style="color:var(--mint)">${tg}</div><div class="statlbl">Completed</div></div>`;
   document.getElementById('papakids').innerHTML=PROFS.map(p=>{
-    const d=getPD(p.id),filled=CATS.filter(c=>d.goals?.[c.id]),done=Object.keys(d.completedCats||{}).length;
-    const rows=filled.map(cat=>{
+    const d=getPD(p.id);
+    const filled=CATS.filter(c=>d.goals?.[c.id]);
+    const done=Object.keys(d.completedCats||{}).length;
+    const totalCats=getProfileCats(p.id).length;
+    const earnedBadges=(d.badges||[]).map(bid=>BADGES.find(b=>b.id===bid)).filter(Boolean);
+    const badgeRow=earnedBadges.length
+      ?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px">${earnedBadges.map(b=>`<div title="${b.desc}" style="background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px;display:flex;align-items:center;gap:4px"><span>${b.ico}</span><span style="font-weight:600;color:var(--gold)">${b.lbl}</span></div>`).join('')}</div>`
+      :`<div style="font-size:12px;color:var(--text3);margin:8px 0 14px">No badges yet</div>`;
+    const goalRows=filled.map(cat=>{
+      const g=d.goals[cat.id];
       const isDone=!!(d.completedCats?.[cat.id]);
-      return `<div class="mrow"><div class="mlbl" style="color:${isDone?'var(--gold)':'var(--text2)'}">${cat.ico} ${cat.lbl}</div><div style="flex:1;font-size:12px;color:var(--text2)">${isDone?'Completed':getCatSummary(cat.id,d.goals[cat.id])}</div></div>`;
+      const dispIco=cat.id.startsWith('custom')&&g.cat_emoji?g.cat_emoji:cat.ico;
+      const dispLbl=cat.id.startsWith('custom')&&g.cat_name?(g.cat_emoji||'✏️')+' '+g.cat_name:cat.lbl;
+      const summary=isDone?'Completed ✓':getCatSummary(cat.id,g);
+      const detail=!isDone&&g?Object.entries(g).filter(([k,v])=>v&&k!=='cat_emoji'&&k!=='cat_name').map(([k,v])=>`<span style="background:var(--surface2);border-radius:6px;padding:2px 7px;font-size:11px;color:var(--text2)">${v}</span>`).join(' '):'';
+      return `<div style="border:1px solid ${isDone?'var(--gold-l)':'var(--border)'};border-radius:12px;padding:12px 14px;margin-bottom:8px;background:${isDone?'#FFFBEE':'var(--surface)'}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:${detail?'8px':'0'}">
+          <span style="font-size:18px">${dispIco}</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:${isDone?'var(--gold)':'var(--text)'}">${dispLbl}</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:1px">${summary}</div>
+          </div>
+          ${isDone?'<span style="font-size:16px">🏅</span>':''}
+        </div>
+        ${detail?`<div style="display:flex;flex-wrap:wrap;gap:4px">${detail}</div>`:''}
+      </div>`;
     }).join('');
-    return `<div class="kidcard"><div class="kidtop"><div class="kidav">${d.avatar||'😎'}</div><div><div style="font-size:17px;font-weight:700">${p.name}</div><div style="font-size:12px;color:var(--text2)">${d.points||0} pts  |  ${(d.badges||[]).length} badges  |  ${d.curStreak||0} day streak  |  ${filled.length}/8 goals  |  ${done} done</div></div></div>${rows}</div>`;
+    const noGoals=!filled.length?`<div style="font-size:13px;color:var(--text3);padding:8px 0 14px">No goals set yet.</div>`:'';
+    const pinStatus=d.pinSet
+      ?`<span style="color:var(--mint);font-size:11px;font-weight:700">● PIN set</span>`
+      :`<span style="color:var(--text3);font-size:11px;font-weight:700">○ No PIN</span>`;
+    return `<div class="kidcard">
+      <div class="kidtop">
+        <div class="kidav">${d.avatar||'😎'}</div>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700">${p.name} ${pinStatus}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${d.points||0} pts · ${d.curStreak||0} day streak · ${filled.length}/${totalCats} goals · ${done} completed</div>
+        </div>
+        <button class="btn btn-gh btn-sm resetpinbtn" data-pid="${p.id}" style="font-size:11px;padding:6px 12px;flex-shrink:0">Reset PIN</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:6px">Badges</div>
+      ${badgeRow}
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px">Goals (${filled.length}/${totalCats})</div>
+      ${noGoals}${goalRows}
+    </div>`;
   }).join('');
   const feed=getFeed().slice(0,10);
   document.getElementById('papafeed').innerHTML=feed.length?feed.map(item=>{
@@ -1146,6 +1185,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(e.target.classList.contains('avopt')){pickav(e.target,e.target.dataset.av||e.target.textContent);return}
     const catcard=e.target.closest('.catrow[data-catid]');if(catcard&&catcard.dataset.catid){openBuilder(catcard.dataset.catid);return}
     const emptycat=e.target.closest('.empty-cat[data-catid]');if(emptycat){openBuilder(emptycat.dataset.catid);return}
+    if(e.target.classList.contains('resetpinbtn')){
+      const pid=e.target.dataset.pid;const d=getPD(pid);d.pin='';d.pinSet=false;savePD(d);
+      toast(PROFS.find(p=>p.id===pid)?.name+''s PIN reset');renderPapa();return;
+    }
     if(e.target.classList.contains('undobtn')){uncompleteGoal(e.target.dataset.catid);return}
     if(e.target.classList.contains('editbtn')){openBuilder(e.target.dataset.catid);return}
     if(e.target.classList.contains('completebtn')){completeGoal(e.target.dataset.catid,e.target.dataset.owner);return}
