@@ -318,7 +318,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     </div>
     <label style="font-size:13px;color:var(--text2);font-weight:600;margin-bottom:7px;display:block">Enter your access code</label>
     <div class="codedisp" id="codedisp">_ _ _ _ _ _</div>
-    <input type="text" class="inp" id="papainp" placeholder="KARNANI26" style="text-transform:uppercase;letter-spacing:4px;font-size:18px;text-align:center;margin-bottom:16px">
+    <input type="text" class="inp" id="papainp" placeholder="KARNANI26" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:4px;font-size:18px;text-align:center;margin-bottom:16px">
     <button class="btn btn-g" id="papaEnterBtn">Enter &#8594;</button>
     <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:12px">Code: KARNANI26</p>
   </div>
@@ -380,7 +380,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     <div style="font-size:40px;text-align:center;margin-bottom:16px">🔒</div>
     <div style="font-family:Sora,sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px" id="pin-title">Enter PIN</div>
     <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.5" id="pin-sub"></div>
-    <input type="text" inputmode="numeric" pattern="\d*" maxlength="4" class="inp" id="pin-input" placeholder="_ _ _ _" style="text-align:center;font-size:28px;letter-spacing:8px;font-family:'JetBrains Mono',monospace;margin-bottom:8px">
+    <input type="text" inputmode="numeric" pattern="\d*" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="pin-input" placeholder="_ _ _ _" style="text-align:center;font-size:28px;letter-spacing:8px;font-family:'JetBrains Mono',monospace;margin-bottom:8px">
     <div style="font-size:13px;color:var(--coral);text-align:center;margin-bottom:16px;min-height:18px" id="pin-error"></div>
     <button class="btn btn-p" id="pin-btn" data-mode="enter" data-pid="">Continue</button>
     <button class="btn btn-gh" style="margin-top:10px" id="pin-cancel-btn">Cancel</button>
@@ -688,7 +688,7 @@ function showSetPin(pid){
   document.getElementById('pin-btn').dataset.mode='set';
   document.getElementById('pin-btn').dataset.pid=pid;
   modal.style.display='flex';
-  document.getElementById('pin-input').focus();
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
 }
 
 function showEnterPin(pid){
@@ -701,7 +701,7 @@ function showEnterPin(pid){
   document.getElementById('pin-btn').dataset.mode='enter';
   document.getElementById('pin-btn').dataset.pid=pid;
   modal.style.display='flex';
-  document.getElementById('pin-input').focus();
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
 }
 
 function handlePin(){
@@ -969,6 +969,7 @@ function submitComment(fid){
   if(item){
     updateFeedPost(fid,{rx:[...(item.rx||[]),{comment:sanitize(txt),aid:CUR?.id,ts:new Date().toISOString()}]});
     inp.value='';
+    const box=document.getElementById('cb-'+fid);if(box)box.style.display='none';
     if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Left a comment');savePD(d);}
   }
 }
@@ -1009,7 +1010,9 @@ async function renderPapa(){
   const feed=getFeed().slice(0,10);
   document.getElementById('papafeed').innerHTML=feed.length?feed.map(item=>{
     const pr=PROFS.find(p=>p.id===item.aid),pd=pr?getPD(pr.id):null;
-    return `<div class="cardsm"><div style="display:flex;gap:10px;align-items:center"><div style="font-size:22px">${pd?.avatar||'👨‍👧‍👦'}</div><div><div style="font-size:13px;font-weight:700">${pr?.name||'Papa'}</div><div style="font-size:12px;color:var(--text2)">${pr?.name||'Papa'} ${item.txt}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${ago(item.ts)}</div></div></div></div>`;
+    const pnm=item.aid==='papa'?'Papa':(pr?.name||'');
+    const ptxt=item.aid==='papa'?item.txt:pnm+' '+item.txt;
+    return `<div class="cardsm"><div style="display:flex;gap:10px;align-items:center"><div style="font-size:22px">${item.aid==='papa'?'👨‍👧‍👦':(pd?.avatar||'😎')}</div><div><div style="font-size:13px;font-weight:700">${pnm}</div><div style="font-size:12px;color:var(--text2)">${ptxt}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${ago(item.ts)}</div></div></div></div>`;
   }).join(''):'<div style="font-size:13px;color:var(--text3);padding:8px 0">No activity yet. Summer starts now.</div>';
 }
 
@@ -1045,6 +1048,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('nav-badges').addEventListener('click',function(){tabt('badges',this)});
   document.getElementById('papaLoginBack').addEventListener('click',()=>ss('s-land'));
   document.getElementById('papainp').addEventListener('input',function(){upcode(this.value)});
+  document.getElementById('papainp').addEventListener('keydown',e=>{if(e.key==='Enter')paplogin()});
   document.getElementById('papaEnterBtn').addEventListener('click',paplogin);
   document.getElementById('papaExitBtn').addEventListener('click',()=>ss('s-land'));
   document.getElementById('resetBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='flex');
@@ -1080,6 +1084,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     if(e.key==='Enter'&&e.target.id==='pin-input'){handlePin();}
   });
+  document.getElementById('pin-input').addEventListener('input',function(){if(this.value.length===4)setTimeout(handlePin,80)});
   document.getElementById('pin-btn').addEventListener('click',handlePin);
   document.getElementById('pin-cancel-btn').addEventListener('click',()=>{
     document.getElementById('pin-modal').style.display='none';
