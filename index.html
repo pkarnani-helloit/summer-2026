@@ -347,7 +347,8 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     <div style="margin-top:32px;padding:20px;background:#FFF0F0;border:1.5px solid var(--coral-l);border-radius:var(--r)">
       <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--coral);margin-bottom:8px">Danger Zone</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Clears all goals, points, badges, and feed entries for everyone. Cannot be undone.</p>
-      <button class="btn" id="resetBtn" style="background:#fff;border:1.5px solid var(--coral);color:var(--coral);font-weight:700;padding:12px 20px">🗑 Reset Everything</button>
+      <button class="btn" id="resetBtn" style="background:#fff;border:1.5px solid var(--coral);color:var(--coral);font-weight:700;padding:12px 20px;margin-bottom:10px">🗑 Reset Everything</button>
+      <button class="btn btn-gh" id="resetPapaPin" style="font-size:13px;padding:11px 20px">🔑 Reset Papa PIN</button>
     </div>
   </div>
 </div>
@@ -414,6 +415,13 @@ const CACHE = {};
 let feedCache = [];
 let feedUnsub = null;
 let welcomeChecked = false;
+let papaCfg = {pin:'',pinSet:false};
+
+async function loadPapaCfg(){
+  const snap=await getDoc(doc(db,'config','papa'));
+  if(snap.exists()) papaCfg={...papaCfg,...snap.data()};
+}
+function savePapaCfg(){setDoc(doc(db,'config','papa'),papaCfg).catch(console.error);}
 
 function defaultProfile(id){
   return {id,points:0,badges:[],goals:{},completedCats:{},recipes:0,books:0,workouts:0,screenFree:0,irl:0,sibTime:0,wellness:0,earned:0,customLogs:0,maxStreak:0,curStreak:0,avatar:'😎',avSet:false,lastActivityDate:'',pin:'',pinSet:false};
@@ -723,6 +731,23 @@ function handlePin(){
   const mode=btn.dataset.mode;
   const val=document.getElementById('pin-input').value.trim();
   if(val.length!==4||!/^\d{4}$/.test(val)){toast('Please enter a 4-digit number');return;}
+  if(mode==='papa-set'){
+    papaCfg.pin=val;papaCfg.pinSet=true;savePapaCfg();
+    document.getElementById('pin-modal').style.display='none';
+    ss('s-papa');renderPapa();
+    return;
+  }
+  if(mode==='papa-enter'){
+    if(papaCfg.pin!==val){
+      document.getElementById('pin-error').textContent='Wrong PIN. Try again.';
+      document.getElementById('pin-input').value='';
+      return;
+    }
+    document.getElementById('pin-error').textContent='';
+    document.getElementById('pin-modal').style.display='none';
+    ss('s-papa');renderPapa();
+    return;
+  }
   const d=getPD(pid);
   if(mode==='set'){
     d.pin=val;d.pinSet=true;savePD(d);
@@ -1013,8 +1038,30 @@ function submitpost(){
 // PAPA
 function upcode(v){document.getElementById('codedisp').textContent=v?v.toUpperCase():'_ _ _ _ _ _'}
 function paplogin(){
-  if(document.getElementById('papainp').value.trim().toUpperCase()==='KARNANI26'){ss('s-papa');renderPapa();}
-  else toast('Wrong code. Hint: KARNANI26');
+  if(document.getElementById('papainp').value.trim().toUpperCase()==='KARNANI26'){
+    if(!papaCfg.pinSet){showPapaSetPin();}
+    else{ss('s-papa');renderPapa();}
+  } else toast('Wrong code.');
+}
+function showPapaSetPin(){
+  document.getElementById('pin-title').textContent='Set Your Papa PIN';
+  document.getElementById('pin-sub').textContent='Choose a 4-digit PIN for future logins.';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-btn').textContent='Set PIN';
+  document.getElementById('pin-btn').dataset.mode='papa-set';
+  document.getElementById('pin-btn').dataset.pid='';
+  document.getElementById('pin-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
+}
+function showPapaEnterPin(){
+  document.getElementById('pin-title').textContent='Welcome, Papa';
+  document.getElementById('pin-sub').textContent='Enter your 4-digit PIN to continue.';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-btn').textContent='Enter';
+  document.getElementById('pin-btn').dataset.mode='papa-enter';
+  document.getElementById('pin-btn').dataset.pid='';
+  document.getElementById('pin-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('pin-input').focus(),100);
 }
 async function renderPapa(){
   await Promise.all(PROFS.map(p=>forceLoadProfile(p.id)));
@@ -1060,11 +1107,13 @@ async function resetAll(){
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('land-cdnum').textContent=dl();
   signInAnonymously(auth)
-    .then(()=>subscribeFeed())
+    .then(()=>{loadPapaCfg();subscribeFeed();})
     .catch(err=>{console.error(err);toast('Connection error — check your internet');});
 
   document.getElementById('kidsBtn').addEventListener('click',async()=>{ss('s-who');await renderWho()});
-  document.getElementById('papaBtn').addEventListener('click',()=>ss('s-papa-login'));
+  document.getElementById('papaBtn').addEventListener('click',()=>{
+    if(papaCfg.pinSet){showPapaEnterPin();}else{ss('s-papa-login');}
+  });
   document.getElementById('whoBack').addEventListener('click',()=>ss('s-land'));
   document.getElementById('avConfirmBtn').addEventListener('click',confirmav);
   document.getElementById('noteNextBtn').addEventListener('click',afternote);
@@ -1079,6 +1128,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('papaExitBtn').addEventListener('click',()=>ss('s-land'));
   document.getElementById('resetBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='flex');
   document.getElementById('resetCancelBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='none');
+  document.getElementById('resetPapaPin').addEventListener('click',()=>{papaCfg={pin:'',pinSet:false};savePapaCfg();toast('Papa PIN cleared — use KARNANI26 next time');});
   document.getElementById('resetConfirmBtn').addEventListener('click',resetAll);
   document.getElementById('shareBtn').addEventListener('click',openpost);
   document.getElementById('postCancelBtn').addEventListener('click',closepost);
