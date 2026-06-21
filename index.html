@@ -181,7 +181,15 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
   <div class="lbody">
     <div class="lsun">☀️</div>
     <h1 class="ltitle"><span class="lacc">2026</span><br>Summer to<br>Remember</h1>
-    <div class="lbtns" style="margin-top:24px">
+    <div style="margin:20px 0 4px;display:flex;align-items:baseline;justify-content:center;gap:10px">
+      <span id="land-cdnum" style="font-family:'Sora',sans-serif;font-size:clamp(56px,18vw,80px);font-weight:800;color:var(--coral);line-height:1;letter-spacing:-3px">66</span>
+      <div style="text-align:left">
+        <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--text2)">days of</div>
+        <div style="font-family:'Sora',sans-serif;font-size:16px;font-weight:700;color:var(--text2)">summer left</div>
+      </div>
+    </div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);font-weight:700;margin-bottom:4px">Jun 20 → Aug 25, 2026</div>
+    <div class="lbtns" style="margin-top:20px">
       <button class="btn btn-p" id="kidsBtn">I'm one of the kids ☀️</button>
       <button class="btn btn-gh" id="papaBtn">I'm Papa</button>
     </div>
@@ -1016,6 +1024,7 @@ async function resetAll(){
 
 // EVENTS
 document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('land-cdnum').textContent=dl();
   signInAnonymously(auth)
     .then(()=>subscribeFeed())
     .catch(err=>{console.error(err);toast('Connection error — check your internet');});
