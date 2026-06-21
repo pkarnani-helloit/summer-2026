@@ -736,7 +736,7 @@ function renderAvGrid(){
   SELBAV=AVEMOJIS[0];
 }
 function pickav(el,a){SELBAV=a;document.querySelectorAll('.avopt').forEach(e=>e.classList.remove('on'));el.classList.add('on')}
-function confirmav(){const d=getPD(CUR.id);d.avatar=SELBAV;d.avSet=true;savePD(d);showNote(CUR.id)}
+function confirmav(){const d=getPD(CUR.id);d.avatar=SELBAV;d.avSet=true;savePD(d);if(!d.pinSet){showSetPin(CUR.id)}else{showNote(CUR.id)}}
 function showNote(pid){
   const p=PROFS.find(x=>x.id===pid);
   document.getElementById('pnname').textContent=p.name;
