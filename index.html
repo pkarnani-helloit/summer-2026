@@ -668,7 +668,7 @@ async function renderWho(){
 }
 async function pickKid(pid){
   toast('Loading...');
-  await loadProfile(pid);
+  await forceLoadProfile(pid);
   const d=getPD(pid);
   if(!d.pinSet){
     CUR=PROFS.find(p=>p.id===pid);
@@ -936,7 +936,7 @@ function renderFeed(){
     }).join('');
     return `<div class="fitem" data-fid="${item.id}">
       <div class="fhdr"><div class="fav">${av}</div><div style="flex:1"><div class="fname">${nm}</div><div class="ftime">${ago(item.ts)}</div></div></div>
-      <div class="fcont">${nm} ${item.txt}</div>
+      <div class="fcont">${item.aid==='papa'?item.txt:nm+' '+item.txt}</div>
       ${comments?`<div style="margin-bottom:10px">${comments}</div>`:''}
       <div class="freacts">${rxns}<div class="radd" data-fid="${item.id}">+ React</div><div class="cadd" data-fid="${item.id}" style="background:transparent;border:1.5px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text3);cursor:pointer;transition:all .2s">+ Comment</div></div>
       <div class="comment-box" id="cb-${item.id}" style="display:none;margin-top:10px">
