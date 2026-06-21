@@ -1187,7 +1187,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const emptycat=e.target.closest('.empty-cat[data-catid]');if(emptycat){openBuilder(emptycat.dataset.catid);return}
     if(e.target.classList.contains('resetpinbtn')){
       const pid=e.target.dataset.pid;const d=getPD(pid);d.pin='';d.pinSet=false;savePD(d);
-      toast(PROFS.find(p=>p.id===pid)?.name+''s PIN reset');renderPapa();return;
+      toast((PROFS.find(p=>p.id===pid)?.name||'Kid')+' PIN reset');renderPapa();return;
     }
     if(e.target.classList.contains('undobtn')){uncompleteGoal(e.target.dataset.catid);return}
     if(e.target.classList.contains('editbtn')){openBuilder(e.target.dataset.catid);return}
