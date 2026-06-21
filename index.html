@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>2026 Summer to Remember</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FFF8F0;--surface:#fff;--surface2:#FFF4E6;--surface3:#FFE8CC;
+  --gold:#F0A500;--gold-l:#FFD166;--coral:#FF6B6B;--coral-l:#FFBEBE;
+  --sky:#3ABDE8;--sky-l:#C8F0FF;--mint:#2DC98E;--mint-l:#C0FAE4;
+  --lav:#7C6FCD;--peach:#FF9F68;--text:#1A1A2E;--text2:#6B7280;
+  --text3:#9CA3AF;--border:#E5E7EB;--border2:#F3F4F6;
+  --sh:0 2px 16px rgba(0,0,0,.07);--sh2:0 4px 28px rgba(0,0,0,.12);
+  --r:20px;--r2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+body{display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column}
+.screen{display:none;flex-direction:column;flex:1;animation:fu .3s ease}
+.screen.active{display:flex}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bou{0%{transform:scale(0) rotate(-10deg)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.scroll{flex:1;overflow-y:auto;padding:20px 20px 110px;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.topbar{padding:13px 20px 10px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.top-name{font-size:15px;font-weight:700}
+.top-pts{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold);font-weight:600;background:var(--surface2);padding:4px 12px;border-radius:20px}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -4px 20px rgba(0,0,0,.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 8px 12px;cursor:pointer;transition:all .2s}
+.ni .ico{font-size:24px}.ni .lbl{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.ni.active .lbl{color:var(--coral)}.ni.active .ico{transform:scale(1.15)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+.cardsm{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;box-shadow:var(--sh)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:all .2s;padding:15px 24px;width:100%}
+.btn-p{background:linear-gradient(135deg,var(--coral),var(--peach));color:#fff;box-shadow:0 4px 14px rgba(255,107,107,.3)}
+.btn-p:active{transform:scale(.98)}
+.btn-g{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:#fff;box-shadow:0 4px 14px rgba(240,165,0,.25)}
+.btn-gh{background:var(--surface2);color:var(--text2)}
+.btn-mint{background:linear-gradient(135deg,var(--mint),#3de8a8);color:#fff;box-shadow:0 4px 14px rgba(45,201,142,.25)}
+.btn-out{background:transparent;color:var(--text2);border:1.5px solid var(--border)}
+.btn-sm{padding:9px 16px;font-size:13px;width:auto;border-radius:10px}
+.inp{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;outline:none;transition:border .2s}
+.inp:focus{border-color:var(--coral);background:#fff}
+.inp::placeholder{color:var(--text3)}
+textarea.inp{resize:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{padding:9px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;transition:all .2s;background:var(--surface);color:var(--text2);font-weight:500}
+.chip.on{border-color:var(--coral);color:var(--coral);background:rgba(255,107,107,.08);font-weight:600}
+.numpk{display:flex;align-items:center;gap:20px;margin-top:10px}
+.nmbtn{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:var(--sh)}
+.nmbtn:active{background:var(--coral);border-color:var(--coral);color:#fff}
+.nmval{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;color:var(--coral);min-width:60px;text-align:center}
+.nmunit{font-size:14px;color:var(--text2)}
+/* COUNTDOWN HERO - bigger */
+.cdhero{background:linear-gradient(150deg,#FFF0DB 0%,#FFE0C8 55%,#FFD6E8 100%);border-radius:26px;padding:32px 20px 28px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:var(--sh2)}
+.cdnum{font-family:'Sora',sans-serif;font-size:110px;font-weight:800;line-height:1;color:var(--coral);letter-spacing:-6px}
+.cdword{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--text2);margin-top:4px}
+.cdsub{font-size:13px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+.cddates{display:flex;justify-content:center;gap:8px;margin-top:16px}
+.datechip{background:rgba(255,255,255,.8);border-radius:20px;padding:7px 18px;font-size:14px;font-weight:700;color:var(--text2);font-family:'JetBrains Mono',monospace}
+/* STATS */
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.statbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:var(--sh)}
+.statval{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600}
+.statlbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;font-weight:700}
+/* HOME CAT ROWS - emoji style */
+.catrow{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;box-shadow:var(--sh)}
+.catrow:active{transform:scale(.98)}
+.catrow.ok{border-color:var(--mint)}
+.catrow.done-row{border-color:var(--gold);background:linear-gradient(135deg,#FFFBEE,#fff)}
+.caticon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.catinfo{flex:1}.cattitle{font-size:15px;font-weight:700}.catsub{font-size:12px;color:var(--text3);margin-top:2px}
+/* GOAL CARDS - main content of Summer tab */
+.gcard{background:var(--surface);border:2px solid var(--border);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.gcard.goal-set{border-color:var(--sky);background:linear-gradient(135deg,#F0FAFF,#fff)}
+.gcard.goal-done{border-color:var(--gold);background:linear-gradient(135deg,#FFFBEE,#FFF8F0)}
+.gcard-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.gcard-ico{font-size:28px;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gcard-title{font-family:'Sora',sans-serif;font-size:16px;font-weight:700}
+.gcard-status{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.gcard-summary{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:14px;border-left:3px solid var(--border);padding-left:12px}
+.gcard-actions{display:flex;gap:8px;flex-wrap:wrap}
+.logbtn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:all .2s;white-space:nowrap}
+.logbtn:hover{background:var(--sky-l);border-color:var(--sky);color:var(--sky)}
+.logbtn:active{transform:scale(.95)}
+.completebtn{background:linear-gradient(135deg,var(--gold),var(--gold-l));border:none;border-radius:10px;padding:8px 16px;font-size:12px;color:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-weight:700;transition:all .2s;white-space:nowrap;box-shadow:0 2px 8px rgba(240,165,0,.3)}
+.completebtn:active{transform:scale(.95)}
+.editbtn{background:transparent;border:1.5px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;transition:all .2s;white-space:nowrap}
+.editbtn:hover{border-color:var(--coral);color:var(--coral)}
+/* EMPTY STATE */
+.empty-cat{background:var(--surface);border:2px dashed var(--border);border-radius:18px;padding:20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s}
+.empty-cat:active{transform:scale(.98);border-color:var(--coral)}
+.empty-ico{font-size:28px;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* GOAL BUILDER */
+.gbhdr{padding:16px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:14px}
+.gbico{font-size:28px;width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gbtitle{font-family:'Sora',sans-serif;font-size:20px;font-weight:700}
+.gbsub{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+.gbody{flex:1;overflow-y:auto;padding:20px;scrollbar-width:none}
+.gbody::-webkit-scrollbar{display:none}
+.gfield{margin-bottom:22px}
+.gfield-lbl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px;display:block}
+.gfooter{padding:14px 20px;display:flex;gap:10px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+/* BADGES */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bitem{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;box-shadow:var(--sh);transition:all .3s}
+.bitem.on{border-color:var(--gold);box-shadow:0 0 0 2px rgba(240,165,0,.2),var(--sh)}
+.bico{font-size:30px;filter:grayscale(1) opacity(.25);transition:all .3s}
+.bitem.on .bico{filter:none}
+.bname{font-size:11px;font-weight:700;color:var(--text3)}.bitem.on .bname{color:var(--gold)}
+.bhint{font-size:10px;color:var(--text3);line-height:1.3}
+/* FEED */
+.fitem{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.fhdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fav{width:40px;height:40px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:2px solid var(--border)}
+.fname{font-size:14px;font-weight:700}.ftime{font-size:11px;color:var(--text3)}
+.fcont{font-size:14px;color:var(--text);line-height:1.55;margin-bottom:12px}
+.freacts{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.rpill{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:13px;cursor:pointer;transition:all .15s}
+.rpill:active{transform:scale(.93)}
+.radd{background:transparent;border:1.5px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text3);cursor:pointer;transition:all .2s}
+.radd:hover{border-color:var(--coral);color:var(--coral)}
+/* LANDING */
+.lbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;background:linear-gradient(160deg,#FFF8F0,#FFF0E6 50%,#E6F7FF)}
+.lsun{font-size:72px;margin-bottom:16px;animation:fl 3s ease-in-out infinite}
+.ltitle{font-family:'Sora',sans-serif;font-size:36px;font-weight:800;line-height:1.1;margin-bottom:14px}
+.lacc{color:var(--coral)}
+.lbtns{width:100%;display:flex;flex-direction:column;gap:12px}
+/* WHO */
+.whocard{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:12px;cursor:pointer;transition:all .2s;box-shadow:var(--sh);display:flex;align-items:center;gap:16px}
+.whocard:active{transform:scale(.98);border-color:var(--coral)}
+.whoav{width:54px;height:54px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:2px solid var(--border)}
+.whoname{font-size:18px;font-weight:700}.whohint{font-size:12px;color:var(--text3);margin-top:3px}
+/* AVATAR */
+.avgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0}
+.avopt{width:54px;height:54px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;transition:all .2s;background:var(--surface)}
+.avopt.on{border-color:var(--coral);background:rgba(255,107,107,.08);transform:scale(1.12);box-shadow:0 0 0 3px rgba(255,107,107,.2)}
+/* PAPA NOTE */
+.pnscreen{flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:32px 24px 40px;background:linear-gradient(170deg,#FFF8F0 0%,#FFF0E6 60%,#FFE8F5 100%)}
+.pnsun{font-size:52px;margin-bottom:20px;animation:fl 3s ease-in-out infinite}
+.pnfrom{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--coral);margin-bottom:8px}
+.pnname{font-family:'Sora',sans-serif;font-size:32px;font-weight:800;margin-bottom:22px;color:var(--text)}
+.pntext{font-size:16px;line-height:1.85;color:var(--text);flex:1;white-space:pre-wrap}
+.pnsign{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--coral);margin-top:26px;margin-bottom:30px}
+/* MISC */
+.slbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;margin-bottom:12px;margin-top:4px}
+.bback{background:none;border:none;color:var(--text2);cursor:pointer;padding:0;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;display:flex;align-items:center;gap:4px}
+.codedisp{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;color:var(--coral);letter-spacing:8px;text-align:center;padding:16px;background:var(--surface2);border-radius:14px;margin:8px 0 20px}
+#toast{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:#fff;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;pointer-events:none;z-index:500;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.kidcard{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+.kidtop{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.kidav{width:48px;height:48px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid var(--border)}
+.mrow{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.mlbl{font-size:11px;color:var(--text2);width:100px;flex-shrink:0;font-weight:600;padding-top:1px}
+.psheet{background:var(--surface);border-radius:28px 28px 0 0;padding:24px 20px 40px;width:100%;max-width:480px}
+.stpick{display:flex;gap:10px;padding:8px 0;margin-bottom:14px;flex-wrap:wrap}
+.stopt{font-size:22px;cursor:pointer;padding:6px 8px;border-radius:10px;transition:transform .15s}
+.stopt:active{transform:scale(1.3)}.stopt.on{background:var(--surface2);outline:2px solid var(--coral);border-radius:10px}
+h1,h2,h3{font-family:'Sora',sans-serif}
+h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="cel" style="position:fixed;inset:0;background:rgba(255,248,240,.97);z-index:1000;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px">
+  <div style="font-size:80px;margin-bottom:16px;animation:bou .6s ease" id="celico">🏅</div>
+  <div style="font-family:Sora,sans-serif;font-size:28px;font-weight:800;color:var(--coral);margin-bottom:8px" id="celtitle">Badge Unlocked</div>
+  <div style="font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.5" id="celsub"></div>
+  <button class="btn btn-p" style="max-width:220px" id="celCloseBtn">Keep Going</button>
+</div>
+<div id="toast"></div>
+
+<!-- LANDING -->
+<div class="screen active" id="s-land">
+  <div class="lbody">
+    <div class="lsun">☀️</div>
+    <h1 class="ltitle"><span class="lacc">2026</span><br>Summer to<br>Remember</h1>
+    <div class="lbtns" style="margin-top:24px">
+      <button class="btn btn-p" id="kidsBtn">I'm one of the kids ☀️</button>
+      <button class="btn btn-gh" id="papaBtn">I'm Papa</button>
+    </div>
+  </div>
+  <div style="padding:14px;text-align:center;font-size:12px;color:var(--text3)">Made with love for Malina, Sasha, and Sam</div>
+</div>
+
+<!-- WHO ARE YOU -->
+<div class="screen" id="s-who">
+  <div style="padding:18px 20px 0;background:var(--surface);border-bottom:1px solid var(--border)">
+    <button class="bback" id="whoBack">&#8592; Back</button>
+    <h2 style="font-size:22px;margin:14px 0 6px">Who are you?</h2>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:18px">Tap your name to enter.</p>
+  </div>
+  <div class="scroll" style="padding-bottom:40px"><div id="whocards" style="padding-top:4px"></div></div>
+</div>
+
+<!-- AVATAR -->
+<div class="screen" id="s-avatar">
+  <div style="padding:20px;background:var(--surface);border-bottom:1px solid var(--border)">
+    <h2 style="font-size:22px;margin-bottom:4px">Pick your avatar</h2>
+    <p style="font-size:14px;color:var(--text2)">This is how you show up in the feed.</p>
+  </div>
+  <div class="scroll" style="padding-bottom:40px">
+    <div class="avgrid" id="avgrid"></div>
+    <button class="btn btn-p" style="margin-top:8px" id="avConfirmBtn">That's me &#8594;</button>
+  </div>
+</div>
+
+<!-- PAPA NOTE -->
+<div class="screen" id="s-note">
+  <div class="pnscreen">
+    <div class="pnsun">☀️</div>
+    <div class="pnfrom">A note from Papa</div>
+    <div class="pnname" id="pnname"></div>
+    <div class="pntext" id="pntext"></div>
+    
+    <button class="btn btn-p" id="noteNextBtn">Build My Summer &#8594;</button>
+  </div>
+</div>
+
+<!-- GOAL BUILDER -->
+<div class="screen" id="s-builder">
+  <div class="gbhdr">
+    <button class="bback" id="builderBack">&#8592; Back</button>
+    <div class="gbico" id="gbico"></div>
+    <div style="flex:1"><div class="gbtitle" id="gbtitle"></div><div class="gbsub" id="gbsub"></div></div>
+  </div>
+  <div class="gbody" id="gbody"></div>
+  <div class="gfooter">
+    <button class="btn btn-gh" style="flex:0 0 90px" id="gbClearBtn">Clear</button>
+    <button class="btn btn-p" id="gbSaveBtn">Save Goal &#8594;</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="s-main">
+  <div class="topbar">
+    <div class="top-name" id="topname">Summer 2026</div>
+    <div class="top-pts" id="toppts">0 pts</div>
+  </div>
+
+  <!-- HOME -->
+  <div id="t-home" class="scroll">
+    <div class="cdhero">
+      <div class="cdnum" id="cdnum">66</div>
+      <div class="cdword">days of summer</div>
+      <div class="cdsub">left to make it count</div>
+      <div class="cddates">
+        <span class="datechip">Jun 20</span>
+        <span style="color:var(--text3);align-self:center;font-size:13px">to</span>
+        <span class="datechip">Aug 25, 2026</span>
+      </div>
+    </div>
+    <div id="pledgewrap"></div>
+    <div class="statrow" id="dashstats"></div>
+    <div class="slbl">My Summer Goals</div>
+    <div id="dashcats"></div>
+  </div>
+
+  <!-- MY GOALS -->
+  <div id="t-summer" class="scroll" style="display:none">
+    <h2 style="font-size:22px;margin-bottom:4px">My Summer to Remember</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Set goals, log progress, mark them complete.</p>
+    <div id="summercontent"></div>
+  </div>
+
+  <!-- FEED -->
+  <div id="t-feed" class="scroll" style="display:none">
+    <h2 style="font-size:22px;margin-bottom:4px">The Feed</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Everyone's wins and moments from this summer.</p>
+    <button class="btn btn-out btn-sm" style="width:100%;margin-bottom:18px" id="shareBtn">+ Share a moment</button>
+    <div id="feedlist"></div>
+  </div>
+
+  <!-- BADGES -->
+  <div id="t-badges" class="scroll" style="display:none">
+    <h2 style="font-size:22px;margin-bottom:4px">Badges</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Earn them by doing the thing.</p>
+    <div class="bgrid" id="bgrid"></div>
+  </div>
+
+  <div class="bnav">
+    <div class="ni active" id="nav-home"><div class="ico">🏠</div><div class="lbl">Home</div></div>
+    <div class="ni" id="nav-summer"><div class="ico">☀️</div><div class="lbl">My Goals</div></div>
+    <div class="ni" id="nav-feed"><div class="ico">💬</div><div class="lbl">Feed</div></div>
+    <div class="ni" id="nav-badges"><div class="ico">🏅</div><div class="lbl">Badges</div></div>
+  </div>
+</div>
+
+<!-- PAPA LOGIN -->
+<div class="screen" id="s-papa-login">
+  <div style="padding:18px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
+    <button class="bback" id="papaLoginBack">&#8592; Back</button>
+  </div>
+  <div class="scroll" style="padding-bottom:40px">
+    <div style="text-align:center;padding:28px 0 20px">
+      <div style="font-size:48px;margin-bottom:12px">👨‍👧‍👦</div>
+      <h2 style="font-size:24px;margin-bottom:6px">Papa's Dashboard</h2>
+      <p style="font-size:14px;color:var(--text2)">Your private view of the summer.</p>
+    </div>
+    <label style="font-size:13px;color:var(--text2);font-weight:600;margin-bottom:7px;display:block">Enter your access code</label>
+    <div class="codedisp" id="codedisp">_ _ _ _ _ _</div>
+    <input type="text" class="inp" id="papainp" placeholder="KARNANI26" style="text-transform:uppercase;letter-spacing:4px;font-size:18px;text-align:center;margin-bottom:16px">
+    <button class="btn btn-g" id="papaEnterBtn">Enter &#8594;</button>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:12px">Code: KARNANI26</p>
+  </div>
+</div>
+
+<!-- PAPA DASHBOARD -->
+<div class="screen" id="s-papa">
+  <div class="topbar">
+    <div class="top-name">👨‍👧‍👦 Papa's View</div>
+    <button class="bback" id="papaExitBtn">&#8592; Exit</button>
+  </div>
+  <div class="scroll">
+    <div class="cdhero" style="margin-top:0">
+      <div class="cdnum" id="papadays">66</div>
+      <div class="cdword">days remaining</div>
+      <div class="cdsub">Summer 2026</div>
+    </div>
+    <div class="statrow" id="papastats"></div>
+    <div class="slbl">Progress</div>
+    <div id="papakids"></div>
+    <div class="slbl" style="margin-top:8px">Recent Activity</div>
+    <div id="papafeed"></div>
+  </div>
+</div>
+
+<!-- POST MODAL -->
+<div id="postmodal" style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:300;display:none;align-items:flex-end;justify-content:center">
+  <div class="psheet">
+    <h3 style="margin-bottom:14px">Share a moment</h3>
+    <textarea class="inp" id="posttxt" rows="3" style="margin-bottom:14px" placeholder="A win, a memory, a milestone..."></textarea>
+    <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px">Tag it:</div>
+    <div class="stpick" id="stpick"></div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn btn-gh" id="postCancelBtn">Cancel</button>
+      <button class="btn btn-p" id="postSubmitBtn">Post It 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div id="pin-modal" style="position:fixed;inset:0;background:rgba(10,14,26,.7);backdrop-filter:blur(8px);z-index:400;display:none;align-items:center;justify-content:center;padding:24px">
+  <div style="background:var(--surface);border-radius:24px;padding:32px 24px;width:100%;max-width:360px;box-shadow:var(--sh2)">
+    <div style="font-size:40px;text-align:center;margin-bottom:16px">🔒</div>
+    <div style="font-family:Sora,sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px" id="pin-title">Enter PIN</div>
+    <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.5" id="pin-sub"></div>
+    <input type="number" inputmode="numeric" maxlength="4" class="inp" id="pin-input" placeholder="4-digit PIN" style="text-align:center;font-size:28px;letter-spacing:8px;font-family:'JetBrains Mono',monospace;margin-bottom:8px">
+    <div style="font-size:13px;color:var(--coral);text-align:center;margin-bottom:16px;min-height:18px" id="pin-error"></div>
+    <button class="btn btn-p" id="pin-btn" data-mode="enter" data-pid="">Continue</button>
+    <button class="btn btn-gh" style="margin-top:10px" id="pin-cancel-btn">Cancel</button>
+  </div>
+</div>
+
+</div>
+<script>
+const DB={get(k){try{return JSON.parse(localStorage.getItem('s26_'+k))}catch{return null}},set(k,v){localStorage.setItem('s26_'+k,JSON.stringify(v))}};
+const PROFS=[{id:'malina',name:'Malina',age:17},{id:'sasha',name:'Sasha',age:15},{id:'sam',name:'Sam',age:12}];
+
+const NOTES={
+  malina:"Dear Malina,\n\nThis is your last summer before a new chapter in your life begins. I want you to feel that, really feel it, and not scroll past it.\n\nI want this summer to be one you look back on with pride. One where you stayed productive, learned skills that will actually matter when you are on your own, and finished strong going into what will be a very short senior year before a giant leap forward to college.\n\nYou are more capable than you give yourself credit for. Learn to cook a few real meals. Get ahead on the SAT. Stay organized. And make time for Sasha and Sam, your friends, and most of all, have FUN!\n\nThis summer is a gift. Use it like one.\n\nI love you more than you know.\n\n❤️ Papa",
+  sasha:"Dear Sasha,\n\nI am so excited for your summer. You have earned this break, and I want you to feel every bit of it.\n\nThis summer, I hope you will turn that energy toward the things that matter most to you. Your goals, your growth, your best life. Chase the cheer dream. Take care of your body. Nurture your friendships. And give yourself the gift of actually being present for all of it, one practice, one workout, one run, one hangout at a time.\n\nPut the phone down long enough to actually feel this summer. Walk with Sam. Make Malina laugh. Show up for yourself the way I know you can.\n\nI love you so much.\n\n❤️ Papa",
+  sam:"Dear Sam,\n\nI want to tell you something I mean completely: you are talented and skilled in ways that still amaze me. Summer had barely begun and you are already creating new things. I am not saying that because I am your Papa. I am saying it because it is true.\n\nThis is the summer to build. Not someday. This summer. One recipe, one bike ride, one knock on a neighbor's door at a time.\n\nYou have a big imagination and a good heart. Go use them. Make friends in the neighborhood. Ride further than you think you can. Get your hands dirty with flour, drumsticks, bike grease, craft supplies, whatever you are into. Tennis, drums, baking, biking, crafts and more, it is all up to you this summer.\n\nI believe in you more than you know. I love you.\n\n❤️ Papa"
+};
+
+const AVEMOJIS=['😎','🌟','🔥','⚡','🎯','🚀','🎨','🎵','🌈','🦁','🐯','🦊','🐧','🦋','🌻','🍀','💎','🏆','🎸','🏄'];
+
+const CATS=[
+  {id:'reading',  ico:'📚', lbl:'Reading',              col:'#F0A500',bg:'#FFF9E6',hint:'Books you want to read'},
+  {id:'fitness',  ico:'💪', lbl:'Fitness',               col:'#FF6B6B',bg:'#FFF0F0',hint:'Workouts and movement'},
+  {id:'cooking',  ico:'🍳', lbl:'Cooking',               col:'#FF9F68',bg:'#FFF5EE',hint:'Recipes and healthy eating'},
+  {id:'skills',   ico:'🎯', lbl:'Skills and Growth',     col:'#7C6FCD',bg:'#F5F3FF',hint:'Learn something new'},
+  {id:'social',   ico:'🤝', lbl:'Friends and Together',  col:'#3ABDE8',bg:'#F0FAFF',hint:'People and memories'},
+  {id:'screen',   ico:'📵', lbl:'Screen Time',           col:'#2DC98E',bg:'#F0FFF8',hint:'Phone and screen limits'},
+  {id:'earn',     ico:'💰', lbl:'Earn and Save',         col:'#F0A500',bg:'#FFF9E6',hint:'Money and work goals'},
+  {id:'wellness', ico:'🌿', lbl:'Health and Wellness',   col:'#FF6B6B',bg:'#FFF0F0',hint:'Mind and body care'},
+  {id:'custom',   ico:'✏️', lbl:'My Own Goal',           col:'#7C6FCD',bg:'#F5F3FF',hint:'Create your own category'},
+];
+
+const BADGES=[
+  {id:'g1', ico:'⭐', lbl:'First Goal',     desc:'Set your first summer goal',           chk:d=>Object.keys(d.goals||{}).length>=1},
+  {id:'g8', ico:'🗺️', lbl:'Full Blueprint', desc:'Goals set in all categories',           chk:d=>CUR&&Object.keys(d.goals||{}).length>=getProfileCats(CUR.id).length},
+  {id:'ck', ico:'🍳', lbl:'First Cook',     desc:'Logged a recipe cooked',               chk:d=>(d.recipes||0)>=1},
+  {id:'bk', ico:'📖', lbl:'Page Turner',    desc:'Finished a book',                      chk:d=>(d.books||0)>=1},
+  {id:'ft', ico:'💪', lbl:'Body Mover',     desc:'Logged 5 workouts',                    chk:d=>(d.workouts||0)>=5},
+  {id:'sc', ico:'📵', lbl:'Screen Breaker', desc:'Logged 7 low-screen days',             chk:d=>(d.screenFree||0)>=7},
+  {id:'il', ico:'🤝', lbl:'Real Life',      desc:'Logged an in-person hangout',          chk:d=>(d.irl||0)>=1},
+  {id:'sb', ico:'👫', lbl:'Together',       desc:'Logged a sibling hangout',             chk:d=>(d.sibTime||0)>=1},
+  {id:'s7', ico:'🔥', lbl:'On Fire',        desc:'7-day activity streak',                chk:d=>(d.maxStreak||0)>=7},
+  {id:'c1', ico:'🏅', lbl:'Goal Crusher',   desc:'Completed a full category goal',       chk:d=>Object.keys(d.completedCats||{}).length>=1},
+  {id:'c8', ico:'🏆', lbl:'Summer Legend',  desc:'Completed all 8 category goals',       chk:d=>Object.keys(d.completedCats||{}).length>=8},
+  {id:'lg', ico:'🌟', lbl:'Legendary',      desc:'Earned 500 or more points',            chk:d=>(d.points||0)>=500},
+];
+
+function getCatFields(catId, pid) {
+  const F = {
+    reading:[
+      {type:'number',key:'count',lbl:'Books I want to read this summer',unit:'books',min:0,max:15,def:2},
+      {type:'text',  key:'first', lbl:'First book on my list',ph:'Title, author, or genre'},
+      {type:'text',  key:'second',lbl:'Another one I want to read (optional)',ph:'Any book you have been putting off'},
+      {type:'textarea',key:'why',lbl:'Why reading matters to me this summer',ph:'Even one sentence is enough'}
+    ],
+    fitness:[
+      {type:'chips',key:'freq',lbl:'How often I will work out or be active',
+       opts:['3 days a week','4 days a week','5 days a week','Every day','A few times a week']},
+      {type:'number',key:'papa_runs',lbl:'Runs or workouts with Papa this summer',unit:'sessions',min:0,max:25,def:pid==='sasha'?6:2},
+      {type:'text', key:'activity',lbl:'My main activity or sport',ph:'Running, biking, cheer, swimming, gym'},
+      {type:'text', key:'goal',    lbl:'One fitness goal I want to hit by August',ph:'Run a mile, do 20 pushups, bike 30 miles'}
+    ],
+    cooking:[
+      {type:'number',key:'recipes',lbl:pid==='sam'?'Recipes I will master in the bakery':'New recipes I want to learn',unit:'recipes',min:1,max:20,def:pid==='sam'?3:4},
+      {type:'text', key:'first',  lbl:'First recipe I am going to make',ph:pid==='sam'?'Cookies, banana bread, brownies':'Pasta, stir fry, eggs, soup'},
+      {type:'text', key:'special',lbl:pid==='sam'?'My signature item that the neighborhood knows me for':'A meal I want to actually be good at',ph:'The thing people will ask you to make again'},
+      {type:'chips',key:'eating', lbl:'My healthy eating commitment',
+       opts:['Eat breakfast every day','Less junk food','No fast food 5 days a week','Cook at least once a week','Track what I eat','All of the above']}
+    ],
+    skills:[
+      {type:'text', key:'skill1',lbl:'A skill I want to develop this summer',ph:'Cooking, coding, photography, music, writing, a sport'},
+      {type:'text', key:'skill2',lbl:'Something I want to understand better',ph:'Money, a language, history, how something works'},
+      ...(pid==='malina'?[
+        {type:'chips',key:'sat',lbl:'SAT prep commitment (August exam)',
+         opts:['1 session per week','2 sessions per week','3 sessions per week','Daily practice','I will make a solid plan']},
+        {type:'chips',key:'adulting',lbl:'One adulting skill I will have by September',
+         opts:['Manage my own schedule','Budget my money','Stay organized','Handle stress well','Cook without a recipe']}
+      ]:[]),
+      ...(pid==='sam'?[
+        {type:'chips',key:'habit',lbl:'Daily habit I will build this summer',
+         opts:['Brush teeth every morning and night','Keep my room clean','Make my bed every day','Be honest even when it is hard','All of these']}
+      ]:[])
+    ],
+    social:[
+      {type:'number',key:'sib_hangouts',lbl:'Weekly hangouts with siblings this summer',unit:'per week',min:1,max:7,def:2},
+      {type:'text', key:'person1',lbl:'One person outside the house I want to spend real time with',ph:'A friend, cousin, neighbor'},
+      {type:'text', key:'memory', lbl:'One memory I want to make this summer',ph:'Something you will still talk about in September'},
+      ...(pid==='sam'?[
+        {type:'number',key:'new_friends',lbl:'New neighborhood friends I want to make',unit:'friends',min:0,max:10,def:2}
+      ]:[])
+    ],
+    screen:[
+      {type:'chips',key:'rule',lbl:'My screen time commitment',
+       opts:['Phone away by 10pm','No phone during meals','Screen-free mornings','Wake up to reading not a screen','Screen limits on weekdays','Phone-free days twice a month']},
+      {type:'number',key:'free_days',lbl:'Days I want to log under 3 screen hours this summer',unit:'days',min:5,max:66,def:20},
+      {type:'textarea',key:'instead',lbl:'What I will do instead of scrolling',ph:'Ride my bike, bake, read, go outside, call a friend'}
+    ],
+    earn:[
+      {type:'text', key:'goal',        lbl:'My money goal for this summer',ph:'Save enough to cover car payments, pay for my own things'},
+      {type:'number',key:'car_payments',lbl:'Car payments I want to earn enough to cover',unit:'payments',min:0,max:12,def:2},
+      {type:'text', key:'target',      lbl:'My specific savings target',ph:'$200, $500, $1,000'},
+      ...(pid==='sasha'?[
+        {type:'chips',key:'job_step',lbl:'My action to get a job in the next 2 weeks',
+         opts:['Apply to 3 places this week','Go in person to 2 places','Ask someone I know for a lead','Build a simple resume','Research what is hiring nearby']}
+      ]:[]),
+      ...(pid==='malina'?[
+        {type:'chips',key:'invest',lbl:'My investing plan this summer',
+         opts:['Keep adding to my portfolio','Research one new stock or fund','Learn more about how investing works']}
+      ]:[])
+    ],
+    wellness:[
+      {type:'chips',key:'mind',lbl:'One thing I will do for my mind this summer',
+       opts:['Daily walks','Journaling','Less late nights','Talk to someone when I need to','Breathing or meditation','Read before bed']},
+      {type:'chips',key:'sleep',lbl:'My sleep commitment',
+       opts:['In bed by 10pm','In bed by 11pm','No screens 30 min before bed','No screens 30 min after waking up','Consistent wake-up time','Sleep 8 hours a night','Wake up with an alarm not a phone']},
+      {type:'text', key:'physical',lbl:'One physical wellness goal',ph:'Drink more water, stretch daily, eat breakfast every day'},
+      {type:'textarea',key:'note',lbl:'Something I want to feel better about by the end of summer',ph:'Energy, stress, confidence, sleep, how I eat'}
+    ],
+    custom:[
+      {type:'text',    key:'cat_name',  lbl:'What do you want to call this goal?',ph:'My music goal, my creative project, my summer challenge...'},
+      {type:'text',    key:'cat_emoji', lbl:'Pick an emoji for it (type one)',ph:'e.g. 🎸 or 🎭 or 🌊'},
+      {type:'textarea',key:'goal_desc', lbl:'Describe your goal',ph:'What do you want to do, make, learn, or achieve?'},
+      {type:'text',    key:'target',    lbl:'How will you know when you have done it?',ph:'I will have finished, built, learned, completed...'},
+      {type:'chips',   key:'by_when',   lbl:'When do you want to hit this?',
+       opts:['By end of June','By end of July','By August 25','Ongoing all summer','No deadline']}
+    ]
+  };
+  return F[catId]||[];
+}
+
+function getCatIntro(catId, pid) {
+  return ({
+    reading:'Name your books. Put a number on it. The act of naming it makes it real.',
+    fitness:pid==='sasha'?'Cheer tryouts do not happen in September. They happen right now, in how you train this summer.':pid==='sam'?'Your bike is your gym, your delivery route, and your adventure all at once.':'Move your body this summer. Future you will feel the difference.',
+    cooking:pid==='malina'?'You are going to be on your own sooner than it feels. Learning to actually cook is one of the most useful things you can do this summer.':pid==='sam'?'The Bakery starts here. One recipe mastered at a time.':'Know what you are putting in your body. Make some of it yourself.',
+    skills:pid==='malina'?'Senior year is short. College comes fast. What does the most prepared version of you look like walking in?':'Pick one thing to get genuinely better at. Just one. That is enough.',
+    social:pid==='sam'?'There are kids in your neighborhood right now. This summer is the one where you go meet them.':'The summers you remember are the ones spent with people. Make a real plan.',
+    screen:'The screen is not going anywhere. But this summer might. Set a rule and actually keep it.',
+    earn:pid==='malina'?'You work. You invest. Set a real target this summer and hit it.':pid==='sasha'?'You want a job. The difference between wanting one and having one is showing up to ask.':'Money does not appear on its own. This summer, start thinking about how you make it.',
+    wellness:'Taking care of yourself is not optional. It is what makes everything else possible.',
+    custom:'This one is yours to design. Name it, describe it, own it. The best goals are the ones nobody assigned you.'
+  })[catId]||'';
+}
+
+function getLogOpts(catId) {
+  return ({
+    reading:   [{type:'book',    pts:75, lbl:'📖 Finished a book  +75pts'}],
+    fitness:   [{type:'workout', pts:20, lbl:'💪 Logged a workout  +20pts'},{type:'dadrun',pts:30,lbl:'🏃 Workout with Papa  +30pts'}],
+    cooking:   [{type:'recipe',  pts:20, lbl:'🍳 Cooked a recipe  +20pts'}],
+    skills:    [{type:'skill',   pts:25, lbl:'🎯 Practiced a skill  +25pts'}],
+    social:    [{type:'sibling', pts:15, lbl:'👫 Sibling hangout  +15pts'},{type:'irl',pts:15,lbl:'🤝 Friend hangout  +15pts'}],
+    screen:    [{type:'screen',  pts:30, lbl:'📵 Low-screen day  +30pts'}],
+    earn:      [{type:'earn',    pts:25, lbl:'💰 Earned or saved  +25pts'}],
+    wellness:  [{type:'wellness',pts:20, lbl:'🌿 Wellness habit  +20pts'}],
+    custom:    [{type:'custom', pts:30, lbl:'✏️ Logged progress  +30pts'}],
+  })[catId]||[];
+}
+
+function getCatSummary(catId, g) {
+  if(!g) return 'Not set yet';
+  return ({
+    reading:   ()=>(g.count||0)+' books  |  First: '+(g.first||'TBD'),
+    fitness:   ()=>(g.freq||'Active')+'  |  '+(g.activity||''),
+    cooking:   ()=>(g.recipes||0)+' recipes  |  '+(g.first||''),
+    skills:    ()=>(g.skill1||'')+(g.sat?'  |  SAT: '+g.sat:''),
+    social:    ()=>(g.sib_hangouts||0)+'x per week with siblings  |  '+(g.person1||''),
+    screen:    ()=>(g.rule||'Limits set')+'  |  '+(g.free_days||0)+' low-screen days target',
+    earn:      ()=>(g.goal||'')+(g.target?'  |  Target: '+g.target:''),
+    custom:    ()=>(g.cat_emoji?g.cat_emoji+' ':'')+''+(g.cat_name||'My Goal')+(g.target?'  |  '+g.target:''),
+    wellness:  ()=>(g.mind||'')+(g.sleep?'  |  Sleep: '+g.sleep:''),
+  })[catId]?.()||'Goal set';
+}
+
+function getProfileCats(pid){
+  // Sasha and Sam don't have Earn & Save
+  if(pid==='sasha'||pid==='sam') return CATS.filter(c=>c.id!=='earn');
+  return CATS;
+}
+
+var CUR=null, SELBAV=AVEMOJIS[0], STICKER='🔥', CURCAT=null;
+
+function ss(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function tabt(t,el){
+  ['home','summer','feed','badges'].forEach(x=>document.getElementById('t-'+x).style.display=x===t?'block':'none');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+function dl(){const e=new Date('2026-08-25'),n=new Date();n.setHours(0,0,0,0);return Math.max(0,Math.ceil((e-n)/86400000))}
+function ago(ts){const d=Date.now()-new Date(ts).getTime();if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return Math.floor(d/86400000)+'d ago'}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function celebrate(ico,lbl,desc){
+  document.getElementById('celico').textContent=ico;
+  document.getElementById('celtitle').textContent=lbl;
+  document.getElementById('celsub').textContent=desc;
+  document.getElementById('cel').style.display='flex';
+}
+function getPD(id){return DB.get('p_'+id)||{id,points:0,badges:[],goals:{},completedCats:{},recipes:0,books:0,workouts:0,screenFree:0,irl:0,sibTime:0,wellness:0,earned:0,maxStreak:0,curStreak:0,avatar:'😎',avSet:false,lastActivityDate:''}}
+function savePD(d){DB.set('p_'+d.id,d)}
+function getFeed(){return DB.get('feed')||[]}
+function saveFeed(f){DB.set('feed',f.slice(0,200))}
+function addPts(d,pts,why){d.points=(d.points||0)+pts;toast('+'+pts+' pts  '+why);chkBadges(d)}
+function chkBadges(d){
+  const prev=new Set(d.badges||[]);
+  BADGES.forEach(b=>{
+    if(!prev.has(b.id)&&b.chk(d)){
+      d.badges=[...(d.badges||[]),b.id];
+      const bi=b;setTimeout(()=>celebrate(bi.ico,bi.lbl,bi.desc),600);
+      const f=getFeed();f.unshift({id:Date.now()+'b',aid:d.id,txt:'earned the "'+b.lbl+'" badge '+b.ico,ts:new Date().toISOString(),rx:[]});saveFeed(f);
+    }
+  });
+}
+function bumpActivity(d){
+  const today=new Date().toDateString();
+  if(d.lastActivityDate!==today){
+    const yest=new Date();yest.setDate(yest.getDate()-1);
+    d.curStreak=d.lastActivityDate===yest.toDateString()?(d.curStreak||0)+1:1;
+    d.maxStreak=Math.max(d.maxStreak||0,d.curStreak);
+    d.lastActivityDate=today;
+  }
+}
+
+// WHO
+function renderWho(){
+  const w=document.getElementById('whocards');w.innerHTML='';
+  PROFS.forEach(p=>{
+    const d=getPD(p.id),filled=Object.keys(d.goals||{}).length,done=Object.keys(d.completedCats||{}).length;
+    const hint=filled>0?filled+' goals set  |  '+done+' completed  |  '+d.points+' pts':'Tap to start your summer';
+    const el=document.createElement('div');el.className='whocard';el.dataset.pid=p.id;
+    el.innerHTML=`<div class="whoav">${d.avatar||'😎'}</div><div><div class="whoname">${p.name}</div><div class="whohint">${hint}</div></div><div style="color:var(--text3);font-size:20px">&#8594;</div>`;
+    w.appendChild(el);
+  });
+}
+function pickKid(pid){
+  // If no profile is active yet, entering your own profile - prompt for PIN
+  const d=getPD(pid);
+  if(!d.pinSet){
+    // First time - set your PIN
+    CUR=PROFS.find(p=>p.id===pid);
+    if(!d.avSet){renderAvGrid();ss('s-avatar')}else{showSetPin(pid);}
+    return;
+  }
+  // Already have a PIN - ask for it
+  showEnterPin(pid);
+}
+
+function showSetPin(pid){
+  const p=PROFS.find(x=>x.id===pid);
+  const modal=document.getElementById('pin-modal');
+  document.getElementById('pin-title').textContent='Hi '+p.name+'! Set your PIN';
+  document.getElementById('pin-sub').textContent='Choose a 4-digit PIN. You will need this every time you log in.';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-btn').textContent='Set PIN';
+  document.getElementById('pin-btn').dataset.mode='set';
+  document.getElementById('pin-btn').dataset.pid=pid;
+  modal.style.display='flex';
+  document.getElementById('pin-input').focus();
+}
+
+function showEnterPin(pid){
+  const p=PROFS.find(x=>x.id===pid);
+  const modal=document.getElementById('pin-modal');
+  document.getElementById('pin-title').textContent='Welcome back, '+p.name;
+  document.getElementById('pin-sub').textContent='Enter your 4-digit PIN to continue.';
+  document.getElementById('pin-input').value='';
+  document.getElementById('pin-btn').textContent='Enter';
+  document.getElementById('pin-btn').dataset.mode='enter';
+  document.getElementById('pin-btn').dataset.pid=pid;
+  modal.style.display='flex';
+  document.getElementById('pin-input').focus();
+}
+
+function handlePin(){
+  const btn=document.getElementById('pin-btn');
+  const pid=btn.dataset.pid;
+  const mode=btn.dataset.mode;
+  const val=document.getElementById('pin-input').value.trim();
+  if(val.length!==4||!/^\d{4}$/.test(val)){toast('Please enter a 4-digit number');return;}
+  const d=getPD(pid);
+  if(mode==='set'){
+    d.pin=val;d.pinSet=true;savePD(d);
+    document.getElementById('pin-modal').style.display='none';
+    CUR=PROFS.find(p=>p.id===pid);
+    showNote(pid);
+  } else {
+    if(d.pin!==val){
+      document.getElementById('pin-error').textContent='Wrong PIN. Try again.';
+      document.getElementById('pin-input').value='';
+      return;
+    }
+    document.getElementById('pin-error').textContent='';
+    document.getElementById('pin-modal').style.display='none';
+    CUR=PROFS.find(p=>p.id===pid);
+    showNote(pid);
+  }
+}
+function renderAvGrid(){
+  const g=document.getElementById('avgrid');g.innerHTML='';
+  AVEMOJIS.forEach((a,i)=>{
+    const el=document.createElement('div');el.className='avopt'+(i===0?' on':'');el.dataset.av=a;el.textContent=a;g.appendChild(el);
+  });
+  SELBAV=AVEMOJIS[0];
+}
+function pickav(el,a){SELBAV=a;document.querySelectorAll('.avopt').forEach(e=>e.classList.remove('on'));el.classList.add('on')}
+function confirmav(){const d=getPD(CUR.id);d.avatar=SELBAV;d.avSet=true;savePD(d);showNote(CUR.id)}
+function showNote(pid){
+  const p=PROFS.find(x=>x.id===pid);
+  document.getElementById('pnname').textContent=p.name;
+  document.getElementById('pntext').textContent=NOTES[pid]||'';
+  ss('s-note');
+}
+function afternote(){openDash(CUR.id)}
+
+// DASHBOARD
+function openDash(pid){
+  CUR=PROFS.find(p=>p.id===pid);
+  ss('s-main');renderDash();
+}
+function renderDash(){
+  const p=CUR,d=getPD(p.id),days=dl();
+  document.getElementById('topname').textContent=d.avatar+' '+p.name;
+  document.getElementById('toppts').textContent=d.points+' pts';
+  document.getElementById('cdnum').textContent=days;
+  const pledge=(d.goals?.wellness?.note)||(d.goals?.social?.memory)||'';
+  document.getElementById('pledgewrap').innerHTML=pledge
+    ?`<div style="background:linear-gradient(135deg,#FFF9E6,#FFF0F5);border:1.5px solid var(--gold-l);border-radius:var(--r);padding:18px;margin-bottom:16px"><div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px;font-weight:700">This Summer</div><div style="font-size:15px;font-style:italic;color:var(--text);line-height:1.65">${pledge}</div></div>`:'';
+  document.getElementById('dashstats').innerHTML=
+    `<div class="statbox"><div class="statval" style="color:var(--coral)">${days}</div><div class="statlbl">Days Left</div></div>`+
+    `<div class="statbox"><div class="statval" style="color:var(--gold)">${d.points}</div><div class="statlbl">Points</div></div>`+
+    `<div class="statbox"><div class="statval" style="color:var(--mint)">${d.curStreak||0} 🔥</div><div class="statlbl">Streak</div></div>`;
+  // Home cat rows with emojis
+  document.getElementById('dashcats').innerHTML=getProfileCats(p.id).map(cat=>{
+    const g=d.goals?.[cat.id],isDone=!!(d.completedCats?.[cat.id]);
+    const statusText=isDone?'Completed':g?getCatSummary(cat.id,g):cat.hint;
+    const arrow=isDone?'✓':g?'✓':'›';
+    const arrowColor=isDone?'var(--gold)':g?'var(--mint)':'var(--text3)';
+    return `<div class="catrow${isDone?' done-row':g?' ok':''}" data-catid="${cat.id}">
+      <div class="caticon-wrap" style="background:${cat.bg}">${cat.id==='custom'&&d.goals?.custom?.cat_emoji?d.goals.custom.cat_emoji:cat.ico}</div>
+      <div class="catinfo"><div class="cattitle">${cat.id==='custom'&&d.goals?.custom?.cat_name?(d.goals.custom.cat_emoji||'✏️')+' '+d.goals.custom.cat_name:cat.lbl}</div><div class="catsub">${statusText}</div></div>
+      <div style="color:${arrowColor};font-size:18px;font-weight:700">${arrow}</div>
+    </div>`;
+  }).join('');
+  renderSummerTab(d);renderBadges(d);renderFeed();
+}
+
+// SUMMER TAB - goal cards as main content
+function renderSummerTab(d){
+  const profileCats=getProfileCats(CUR.id);
+  const set=profileCats.filter(c=>d.goals?.[c.id]);
+  const unset=profileCats.filter(c=>!d.goals?.[c.id]);
+  let html='';
+  if(set.length){
+    html+='<div class="slbl">My Goals</div>';
+    set.forEach(cat=>{
+      const g=d.goals[cat.id],isDone=!!(d.completedCats?.[cat.id]);
+      const logs=getLogOpts(cat.id);
+      const logBtns=isDone?'':logs.map(l=>`<button class="logbtn" data-type="${l.type}" data-pts="${l.pts}">${l.lbl}</button>`).join('');
+      const completeBtn=isDone
+        ?`<span style="color:var(--gold);font-size:12px;font-weight:700">✓ Completed</span>`
+        :`<button class="completebtn" data-catid="${cat.id}" data-owner="${CUR.id}">✓ Mark Complete  +100pts</button>`;
+      html+=`<div class="gcard${isDone?' goal-done':' goal-set'}">
+        <div class="gcard-header">
+          <div class="gcard-ico" style="background:${cat.bg}">${cat.ico}</div>
+          <div style="flex:1">
+            <div class="gcard-title">${cat.id==='custom'&&g.cat_name?(g.cat_emoji||'✏️')+' '+g.cat_name:cat.lbl}</div>
+            <div class="gcard-status" style="color:${isDone?'var(--gold)':'var(--sky)'}">${isDone?'Completed':'Goal Set'}</div>
+          </div>
+          <button class="editbtn" data-catid="${cat.id}" data-owner="${CUR.id}">${isDone?'View':'Edit'}</button>
+        </div>
+        <div class="gcard-summary">${getCatSummary(cat.id,g)}</div>
+        <div class="gcard-actions">${logBtns}${completeBtn}</div>
+      </div>`;
+    });
+  }
+  if(unset.length){
+    html+=`<div class="slbl" style="margin-top:${set.length?'24px':'0'}">Add a Goal</div>`;
+    unset.forEach(cat=>{
+      html+=`<div class="empty-cat" data-catid="${cat.id}">
+        <div class="empty-ico" style="background:${cat.bg}">${cat.ico}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--text)">${cat.lbl}</div><div style="font-size:12px;color:var(--text3);margin-top:2px">${cat.hint}</div></div>
+        <div style="color:var(--text3);font-size:18px">+</div>
+      </div>`;
+    });
+  }
+  document.getElementById('summercontent').innerHTML=html;
+}
+
+// GOAL BUILDER
+function openBuilder(catId,ownerId){
+  // ownerId lets siblings view but not edit
+  const isOwner=!ownerId||ownerId===CUR.id;
+  CURCAT=CATS.find(c=>c.id===catId);if(!CURCAT)return;
+  const targetId=ownerId||CUR.id;
+  const d=getPD(targetId),existing=d.goals?.[catId]||{};
+  const fields=getCatFields(catId,CUR.id);
+  document.getElementById('gbico').textContent=CURCAT.ico;
+  document.getElementById('gbico').style.background=CURCAT.bg;
+  document.getElementById('gbtitle').textContent=CURCAT.lbl;
+  document.getElementById('gbsub').textContent=getCatIntro(catId,CUR.id);
+  let html='';
+  fields.forEach(f=>{
+    const val=existing[f.key]!==undefined?existing[f.key]:'';
+    html+=`<div class="gfield"><div class="gfield-lbl">${f.lbl}</div>`;
+    if(f.type==='number'){
+      const v=val!==''?val:f.def;
+      html+=`<div class="numpk" data-field="${f.key}" data-min="${f.min||0}" data-max="${f.max||99}"><button class="nmbtn" data-dir="-1">&#8722;</button><div class="nmval">${v}</div><button class="nmbtn" data-dir="1">+</button><span class="nmunit">${f.unit}</span></div>`;
+    } else if(f.type==='chips'){
+      html+=`<div class="chips" data-field="${f.key}">${(f.opts||[]).map(o=>`<div class="chip${val===o?' on':''}" data-val="${o.replace(/"/g,'&quot;')}">${o}</div>`).join('')}</div>`;
+    } else if(f.type==='textarea'){
+      html+=`<textarea class="inp" data-field="${f.key}" rows="3" placeholder="${f.ph||''}">${val}</textarea>`;
+    } else {
+      html+=`<input class="inp" type="text" data-field="${f.key}" placeholder="${f.ph||''}" value="${val}">`;
+    }
+    html+='</div>';
+  });
+  const body=document.getElementById('gbody');body.innerHTML=html;
+  body.querySelectorAll('.numpk').forEach(pk=>{
+    const mn=parseInt(pk.dataset.min)||0,mx=parseInt(pk.dataset.max)||99;
+    pk.querySelectorAll('.nmbtn').forEach(btn=>btn.addEventListener('click',()=>{
+      const disp=pk.querySelector('.nmval');
+      disp.textContent=Math.max(mn,Math.min(mx,(parseInt(disp.textContent)||0)+parseInt(btn.dataset.dir)));
+    }));
+  });
+  body.querySelectorAll('.chips').forEach(grp=>{
+    grp.querySelectorAll('.chip').forEach(chip=>chip.addEventListener('click',()=>{
+      grp.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));chip.classList.add('on');
+    }));
+  });
+  document.getElementById('gbSaveBtn').textContent=isOwner?'Save Goal →':'View Only';
+  document.getElementById('gbSaveBtn').disabled=!isOwner;
+  document.getElementById('gbSaveBtn').style.opacity=isOwner?'1':'0.5';
+  document.getElementById('gbClearBtn').style.display=isOwner?'flex':'none';
+  // Disable all inputs if viewing
+  if(!isOwner){
+    document.getElementById('gbody').querySelectorAll('input,textarea,.chip,.nmbtn').forEach(el=>{
+      el.style.pointerEvents='none';el.style.opacity='0.7';
+    });
+  }
+  ss('s-builder');
+}
+function saveGoal(){
+  if(document.getElementById('gbSaveBtn').disabled){toast('You can view but not edit another person\'s goals');return;}
+  const result={},body=document.getElementById('gbody');
+  body.querySelectorAll('[data-field]').forEach(el=>{
+    if(el.classList.contains('chips')){const s=el.querySelector('.chip.on');if(s)result[el.dataset.field]=s.dataset.val;}
+    else if(el.classList.contains('numpk')){result[el.dataset.field]=parseInt(el.querySelector('.nmval').textContent)||0;}
+    else{result[el.dataset.field]=el.value.trim();}
+  });
+  const d=getPD(CUR.id);const isNew=!d.goals?.[CURCAT.id];
+  d.goals=d.goals||{};d.goals[CURCAT.id]=result;
+  if(isNew){addPts(d,50,'Goal set: '+CURCAT.lbl);}
+  bumpActivity(d);savePD(d);chkBadges(d);
+  if(isNew){const f=getFeed();f.unshift({id:Date.now()+'g',aid:CUR.id,txt:'set a new goal: '+CURCAT.ico+' '+CURCAT.lbl,ts:new Date().toISOString(),rx:[]});saveFeed(f);}
+  toast(CURCAT.ico+' Saved!');
+  ss('s-main');tabt('summer',document.getElementById('nav-summer'));renderDash();
+}
+function clearGoal(){
+  const d=getPD(CUR.id);if(d.goals?.[CURCAT.id]){delete d.goals[CURCAT.id];if(d.completedCats?.[CURCAT.id])delete d.completedCats[CURCAT.id];savePD(d);toast('Goal cleared');}
+  ss('s-main');tabt('summer',document.getElementById('nav-summer'));renderDash();
+}
+function completeGoal(catId,ownerId){
+  if(ownerId&&ownerId!==CUR.id){toast('You can only complete your own goals');return;}
+  const cat=CATS.find(c=>c.id===catId);if(!cat)return;
+  const d=getPD(CUR.id);
+  if(!d.completedCats?.[catId]){
+    d.completedCats=d.completedCats||{};d.completedCats[catId]=new Date().toISOString();
+    bumpActivity(d);addPts(d,100,'Completed: '+cat.lbl);savePD(d);
+    const f=getFeed();f.unshift({id:Date.now()+'cc',aid:CUR.id,txt:'completed their '+cat.ico+' '+cat.lbl+' goal!',ts:new Date().toISOString(),rx:[]});saveFeed(f);
+    chkBadges(d);renderDash();
+  }
+}
+function logA(type,pts){
+  if(!CUR){toast('Please select your profile first');return;}
+  const d=getPD(CUR.id);
+  const map={book:()=>d.books=(d.books||0)+1,recipe:()=>d.recipes=(d.recipes||0)+1,workout:()=>d.workouts=(d.workouts||0)+1,dadrun:()=>d.workouts=(d.workouts||0)+1,screen:()=>d.screenFree=(d.screenFree||0)+1,sibling:()=>d.sibTime=(d.sibTime||0)+1,irl:()=>d.irl=(d.irl||0)+1,wellness:()=>d.wellness=(d.wellness||0)+1,earn:()=>d.earned=(d.earned||0)+1,custom:()=>d.customLogs=(d.customLogs||0)+1};
+  if(map[type])map[type]();
+  bumpActivity(d);addPts(d,pts,type+' logged');savePD(d);
+  document.getElementById('toppts').textContent=d.points+' pts';
+  renderBadges(d);const dd=getPD(CUR.id);renderSummerTab(dd);
+}
+
+// BADGES
+function renderBadges(d){
+  const e=new Set(d.badges||[]);
+  document.getElementById('bgrid').innerHTML=BADGES.map(b=>
+    `<div class="bitem${e.has(b.id)?' on':''}"><div class="bico">${b.ico}</div><div class="bname">${b.lbl}</div>${e.has(b.id)?'':'<div class="bhint">'+b.desc+'</div>'}</div>`
+  ).join('');
+}
+
+// FEED - shows ALL profiles activity
+function renderFeed(){
+  const feed=getFeed(),el=document.getElementById('feedlist');
+  if(!feed.length){el.innerHTML='<div class="card" style="text-align:center;padding:32px"><div style="font-size:40px;margin-bottom:10px">💬</div><div style="font-weight:700;margin-bottom:6px">Nothing here yet.</div><div style="font-size:13px;color:var(--text2)">Be the first to share a win.</div></div>';return}
+  el.innerHTML=feed.map(item=>{
+    const pr=PROFS.find(p=>p.id===item.aid),pd=pr?getPD(pr.id):null;
+    const av=item.aid==='papa'?'👨‍👧‍👦':(pd?.avatar||'😎'),nm=item.aid==='papa'?'Papa':(pr?.name||'');
+    const rxns=(item.rx||[]).filter(r=>r.s&&!r.comment).map(r=>`<div class="rpill">${r.s}</div>`).join('');
+    const comments=(item.rx||[]).filter(r=>r.comment).map(r=>{
+      const rpr=PROFS.find(p=>p.id===r.aid),rpd=rpr?getPD(rpr.id):null;
+      const rav=r.aid==='papa'?'👨‍👧‍👦':(rpd?.avatar||'😎'),rnm=r.aid==='papa'?'Papa':(rpr?.name||'');
+      return `<div style="display:flex;align-items:flex-start;gap:8px;margin-top:8px"><div style="width:26px;height:26px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1.5px solid var(--border)">${rav}</div><div style="background:var(--surface2);border-radius:12px;padding:7px 12px;flex:1"><div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:2px">${rnm}</div><div style="font-size:13px;color:var(--text);line-height:1.4">${r.comment}</div></div></div>`;
+    }).join('');
+    return `<div class="fitem" data-fid="${item.id}">
+      <div class="fhdr"><div class="fav">${av}</div><div style="flex:1"><div class="fname">${nm}</div><div class="ftime">${ago(item.ts)}</div></div></div>
+      <div class="fcont">${nm} ${item.txt}</div>
+      ${comments?`<div style="margin-bottom:10px">${comments}</div>`:''}
+      <div class="freacts">${rxns}<div class="radd" data-fid="${item.id}">+ React</div><div class="cadd" data-fid="${item.id}" style="background:transparent;border:1.5px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text3);cursor:pointer;transition:all .2s">+ Comment</div></div>
+      <div class="comment-box" id="cb-${item.id}" style="display:none;margin-top:10px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" class="inp comment-inp" data-fid="${item.id}" placeholder="Say something..." style="flex:1;padding:9px 14px;font-size:13px;border-radius:10px">
+          <button class="btn btn-p comment-send" data-fid="${item.id}" style="width:auto;padding:9px 16px;font-size:13px;border-radius:10px">Send</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addRx(id){
+  const stickers=['🔥','❤️','💪','👏','🏆','✨','😂'];
+  const s=stickers[Math.floor(Math.random()*stickers.length)];
+  const f=getFeed(),item=f.find(x=>x.id===id);
+  if(item){item.rx=[...(item.rx||[]),{s,aid:CUR?.id}];saveFeed(f);if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Reacted');savePD(d)}renderFeed();}
+}
+function toggleComment(fid){
+  const box=document.getElementById('cb-'+fid);
+  if(box){box.style.display=box.style.display==='none'?'block':'none';if(box.style.display==='block')box.querySelector('.comment-inp').focus();}
+}
+function submitComment(fid){
+  const inp=document.querySelector(`.comment-inp[data-fid="${fid}"]`);
+  if(!inp)return;
+  const txt=inp.value.trim();if(!txt)return;
+  const f=getFeed(),item=f.find(x=>x.id===fid);
+  if(item){
+    item.rx=[...(item.rx||[]),{comment:sanitize(txt),aid:CUR?.id,ts:new Date().toISOString()}];
+    saveFeed(f);inp.value='';
+    if(CUR){const d=getPD(CUR.id);bumpActivity(d);addPts(d,3,'Left a comment');savePD(d)}
+    renderFeed();
+  }
+}
+function openpost(){document.getElementById('postmodal').style.display='flex'}
+function closepost(){document.getElementById('postmodal').style.display='none'}
+function pickst(el,s){STICKER=s;document.querySelectorAll('.stopt').forEach(x=>x.classList.remove('on'));el.classList.add('on')}
+function sanitize(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').slice(0,300)}
+function submitpost(){
+  const raw=document.getElementById('posttxt').value.trim();if(!raw){toast('Write something first');return}
+  const txt=sanitize(raw);
+  const f=getFeed();f.unshift({id:Date.now()+'p',aid:CUR.id,txt:txt+' '+STICKER,ts:new Date().toISOString(),rx:[]});saveFeed(f);
+  const d=getPD(CUR.id);bumpActivity(d);addPts(d,5,'Shared a moment');savePD(d);
+  document.getElementById('posttxt').value='';closepost();renderFeed();
+}
+
+// PAPA
+function upcode(v){document.getElementById('codedisp').textContent=v?v.toUpperCase():'_ _ _ _ _ _'}
+function paplogin(){
+  if(document.getElementById('papainp').value.trim().toUpperCase()==='KARNANI26'){ss('s-papa');renderPapa();}
+  else toast('Wrong code. Hint: KARNANI26');
+}
+function renderPapa(){
+  document.getElementById('papadays').textContent=dl();
+  let tp=0,tb=0,tg=0;
+  PROFS.forEach(p=>{const d=getPD(p.id);tp+=d.points||0;tb+=(d.badges||[]).length;tg+=Object.keys(d.completedCats||{}).length});
+  document.getElementById('papastats').innerHTML=
+    `<div class="statbox"><div class="statval" style="color:var(--coral)">${tp}</div><div class="statlbl">Total Pts</div></div>`+
+    `<div class="statbox"><div class="statval" style="color:var(--gold)">${tb}</div><div class="statlbl">Badges</div></div>`+
+    `<div class="statbox"><div class="statval" style="color:var(--mint)">${tg}</div><div class="statlbl">Completed</div></div>`;
+  document.getElementById('papakids').innerHTML=PROFS.map(p=>{
+    const d=getPD(p.id),filled=CATS.filter(c=>d.goals?.[c.id]),done=Object.keys(d.completedCats||{}).length;
+    const rows=filled.map(cat=>{
+      const isDone=!!(d.completedCats?.[cat.id]);
+      return `<div class="mrow"><div class="mlbl" style="color:${isDone?'var(--gold)':'var(--text2)'}">${cat.ico} ${cat.lbl}</div><div style="flex:1;font-size:12px;color:var(--text2)">${isDone?'Completed':getCatSummary(cat.id,d.goals[cat.id])}</div></div>`;
+    }).join('');
+    return `<div class="kidcard"><div class="kidtop"><div class="kidav">${d.avatar||'😎'}</div><div><div style="font-size:17px;font-weight:700">${p.name}</div><div style="font-size:12px;color:var(--text2)">${d.points||0} pts  |  ${(d.badges||[]).length} badges  |  ${d.curStreak||0} day streak  |  ${filled.length}/8 goals  |  ${done} done</div></div></div>${rows}</div>`;
+  }).join('');
+  const feed=getFeed().slice(0,10);
+  document.getElementById('papafeed').innerHTML=feed.length?feed.map(item=>{
+    const pr=PROFS.find(p=>p.id===item.aid),pd=pr?getPD(pr.id):null;
+    return `<div class="cardsm"><div style="display:flex;gap:10px;align-items:center"><div style="font-size:22px">${pd?.avatar||'👨‍👧‍👦'}</div><div><div style="font-size:13px;font-weight:700">${pr?.name||'Papa'}</div><div style="font-size:12px;color:var(--text2)">${pr?.name||'Papa'} ${item.txt}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${ago(item.ts)}</div></div></div></div>`;
+  }).join(''):'<div style="font-size:13px;color:var(--text3);padding:8px 0">No activity yet. Summer starts now.</div>';
+}
+
+// EVENTS
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('kidsBtn').addEventListener('click',()=>{ss('s-who');renderWho()});
+  document.getElementById('papaBtn').addEventListener('click',()=>ss('s-papa-login'));
+  document.getElementById('whoBack').addEventListener('click',()=>ss('s-land'));
+  document.getElementById('avConfirmBtn').addEventListener('click',confirmav);
+  document.getElementById('noteNextBtn').addEventListener('click',afternote);
+  document.getElementById('nav-home').addEventListener('click',function(){tabt('home',this)});
+  document.getElementById('nav-summer').addEventListener('click',function(){tabt('summer',this)});
+  document.getElementById('nav-feed').addEventListener('click',function(){tabt('feed',this)});
+  document.getElementById('nav-badges').addEventListener('click',function(){tabt('badges',this)});
+  document.getElementById('papaLoginBack').addEventListener('click',()=>ss('s-land'));
+  document.getElementById('papainp').addEventListener('input',function(){upcode(this.value)});
+  document.getElementById('papaEnterBtn').addEventListener('click',paplogin);
+  document.getElementById('papaExitBtn').addEventListener('click',()=>ss('s-land'));
+  document.getElementById('shareBtn').addEventListener('click',openpost);
+  document.getElementById('postCancelBtn').addEventListener('click',closepost);
+  document.getElementById('postSubmitBtn').addEventListener('click',submitpost);
+  document.getElementById('celCloseBtn').addEventListener('click',()=>document.getElementById('cel').style.display='none');
+  document.getElementById('builderBack').addEventListener('click',()=>{ss('s-main');tabt('summer',document.getElementById('nav-summer'))});
+  document.getElementById('gbSaveBtn').addEventListener('click',saveGoal);
+  document.getElementById('gbClearBtn').addEventListener('click',clearGoal);
+  ['🔥','⭐','💪','📚','🍳','🎉','❤️'].forEach((s,i)=>{
+    const el=document.createElement('span');el.className='stopt'+(i===0?' on':'');el.textContent=s;
+    el.addEventListener('click',function(){pickst(this,s)});document.getElementById('stpick').appendChild(el);
+  });
+  document.addEventListener('click',e=>{
+    const wc=e.target.closest('.whocard');if(wc){pickKid(wc.dataset.pid);return}
+    if(e.target.classList.contains('avopt')){pickav(e.target,e.target.dataset.av||e.target.textContent);return}
+    const catcard=e.target.closest('.catrow[data-catid]');if(catcard&&catcard.dataset.catid){openBuilder(catcard.dataset.catid);return}
+    const emptycat=e.target.closest('.empty-cat[data-catid]');if(emptycat){openBuilder(emptycat.dataset.catid);return}
+    if(e.target.classList.contains('editbtn')){openBuilder(e.target.dataset.catid);return}
+    if(e.target.classList.contains('completebtn')){completeGoal(e.target.dataset.catid,e.target.dataset.owner);return}
+    if(e.target.classList.contains('logbtn')){logA(e.target.dataset.type,parseInt(e.target.dataset.pts));return}
+    if(e.target.classList.contains('radd')){addRx(e.target.dataset.fid);return}
+    if(e.target.classList.contains('cadd')){toggleComment(e.target.dataset.fid);return}
+    if(e.target.classList.contains('comment-send')){submitComment(e.target.dataset.fid);return}
+  });
+  // Enter key on comment inputs
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target.classList.contains('comment-inp')){
+      submitComment(e.target.dataset.fid);
+    }
+    if(e.key==='Enter'&&e.target.id==='pin-input'){handlePin();}
+  });
+  document.getElementById('pin-btn').addEventListener('click',handlePin);
+  document.getElementById('pin-cancel-btn').addEventListener('click',()=>{
+    document.getElementById('pin-modal').style.display='none';
+    document.getElementById('pin-input').value='';
+    document.getElementById('pin-error').textContent='';
+  });
+  renderWho();
+  if(!DB.get('welcomed')){
+    saveFeed([{id:'w0',aid:'papa',txt:"Happy Father's Day! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]}]);
+    DB.set('welcomed',true);
+  }
+});
+</script>
+</body>
+</html>
