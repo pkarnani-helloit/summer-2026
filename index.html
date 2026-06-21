@@ -10,6 +10,9 @@
 <meta property="og:url" content="https://pkarnani-helloit.github.io/summer-2026/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Summer 2026">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -466,6 +469,8 @@ const CATS=[
   {id:'earn',     ico:'💰', lbl:'Earn and Save',         col:'#F0A500',bg:'#FFF9E6',hint:'Money and work goals'},
   {id:'wellness', ico:'🌿', lbl:'Health and Wellness',   col:'#FF6B6B',bg:'#FFF0F0',hint:'Mind and body care'},
   {id:'custom',   ico:'✏️', lbl:'My Own Goal',           col:'#7C6FCD',bg:'#F5F3FF',hint:'Create your own category'},
+  {id:'custom2',  ico:'✏️', lbl:'My Own Goal #2',       col:'#7C6FCD',bg:'#F5F3FF',hint:'Add another custom goal'},
+  {id:'custom3',  ico:'✏️', lbl:'My Own Goal #3',       col:'#7C6FCD',bg:'#F5F3FF',hint:'Add a third custom goal'},
 ];
 
 const BADGES=[
@@ -483,7 +488,9 @@ const BADGES=[
   {id:'lg', ico:'🌟', lbl:'Legendary',      desc:'Earned 500 or more points',            chk:d=>(d.points||0)>=500},
 ];
 
+function baseId(id){return id.startsWith('custom')?'custom':id;}
 function getCatFields(catId, pid) {
+  catId=baseId(catId);
   const F = {
     reading:[
       {type:'number',key:'count',lbl:'Books I want to read this summer',unit:'books',min:0,max:15,def:2},
@@ -567,6 +574,7 @@ function getCatFields(catId, pid) {
 }
 
 function getCatIntro(catId, pid) {
+  catId=baseId(catId);
   return ({
     reading:'Name your books. Put a number on it. The act of naming it makes it real.',
     fitness:pid==='sasha'?'Cheer tryouts do not happen in September. They happen right now, in how you train this summer.':pid==='sam'?'Your bike is your gym, your delivery route, and your adventure all at once.':'Move your body this summer. Future you will feel the difference.',
@@ -581,6 +589,7 @@ function getCatIntro(catId, pid) {
 }
 
 function getLogOpts(catId) {
+  catId=baseId(catId);
   return ({
     reading:   [{type:'book',    pts:75, lbl:'📖 Finished a book  +75pts'}],
     fitness:   [{type:'workout', pts:20, lbl:'💪 Logged a workout  +20pts'},{type:'dadrun',pts:30,lbl:'🏃 Workout with Papa  +30pts'}],
@@ -595,6 +604,7 @@ function getLogOpts(catId) {
 }
 
 function getCatSummary(catId, g) {
+  catId=baseId(catId);
   if(!g) return 'Not set yet';
   return ({
     reading:   ()=>(g.count||0)+' books  |  First: '+(g.first||'TBD'),
@@ -609,10 +619,13 @@ function getCatSummary(catId, g) {
   })[catId]?.()||'Goal set';
 }
 
-function getProfileCats(pid){
-  // Sasha and Sam don't have Earn & Save
-  if(pid==='sasha'||pid==='sam') return CATS.filter(c=>c.id!=='earn');
-  return CATS;
+function getProfileCats(pid, d){
+  const base=CATS.filter(c=>c.id!=='custom2'&&c.id!=='custom3'&&(pid!=='sasha'&&pid!=='sam'||c.id!=='earn'));
+  if(!d) return base;
+  const extras=[];
+  if(d.goals?.custom) extras.push(CATS.find(c=>c.id==='custom2'));
+  if(d.goals?.custom2) extras.push(CATS.find(c=>c.id==='custom3'));
+  return [...base,...extras.filter(Boolean)];
 }
 
 var CUR=null, SELBAV=AVEMOJIS[0], STICKER='🔥', CURCAT=null;
@@ -763,14 +776,16 @@ function renderDash(){
     `<div class="statbox"><div class="statval" style="color:var(--gold)">${d.points}</div><div class="statlbl">Points</div></div>`+
     `<div class="statbox"><div class="statval" style="color:var(--mint)">${d.curStreak||0} 🔥</div><div class="statlbl">Streak</div></div>`;
   // Home cat rows with emojis
-  document.getElementById('dashcats').innerHTML=getProfileCats(p.id).map(cat=>{
+  document.getElementById('dashcats').innerHTML=getProfileCats(p.id,d).map(cat=>{
     const g=d.goals?.[cat.id],isDone=!!(d.completedCats?.[cat.id]);
     const statusText=isDone?'Completed':g?getCatSummary(cat.id,g):cat.hint;
     const arrow=isDone?'✓':g?'✓':'›';
     const arrowColor=isDone?'var(--gold)':g?'var(--mint)':'var(--text3)';
+    const dispIco=cat.id.startsWith('custom')&&g?.cat_emoji?g.cat_emoji:cat.ico;
+    const dispLbl=cat.id.startsWith('custom')&&g?.cat_name?(g.cat_emoji||'✏️')+' '+g.cat_name:cat.lbl;
     return `<div class="catrow${isDone?' done-row':g?' ok':''}" data-catid="${cat.id}">
-      <div class="caticon-wrap" style="background:${cat.bg}">${cat.id==='custom'&&d.goals?.custom?.cat_emoji?d.goals.custom.cat_emoji:cat.ico}</div>
-      <div class="catinfo"><div class="cattitle">${cat.id==='custom'&&d.goals?.custom?.cat_name?(d.goals.custom.cat_emoji||'✏️')+' '+d.goals.custom.cat_name:cat.lbl}</div><div class="catsub">${statusText}</div></div>
+      <div class="caticon-wrap" style="background:${cat.bg}">${dispIco}</div>
+      <div class="catinfo"><div class="cattitle">${dispLbl}</div><div class="catsub">${statusText}</div></div>
       <div style="color:${arrowColor};font-size:18px;font-weight:700">${arrow}</div>
     </div>`;
   }).join('');
@@ -779,7 +794,7 @@ function renderDash(){
 
 // SUMMER TAB - goal cards as main content
 function renderSummerTab(d){
-  const profileCats=getProfileCats(CUR.id);
+  const profileCats=getProfileCats(CUR.id,d);
   const set=profileCats.filter(c=>d.goals?.[c.id]);
   const unset=profileCats.filter(c=>!d.goals?.[c.id]);
   let html='';
@@ -789,14 +804,16 @@ function renderSummerTab(d){
       const g=d.goals[cat.id],isDone=!!(d.completedCats?.[cat.id]);
       const logs=getLogOpts(cat.id);
       const logBtns=isDone?'':logs.map(l=>`<button class="logbtn" data-type="${l.type}" data-pts="${l.pts}">${l.lbl}</button>`).join('');
+      const dispIco=cat.id.startsWith('custom')&&g.cat_emoji?g.cat_emoji:cat.ico;
+      const dispLbl=cat.id.startsWith('custom')&&g.cat_name?(g.cat_emoji||'✏️')+' '+g.cat_name:cat.lbl;
       const completeBtn=isDone
-        ?`<span style="color:var(--gold);font-size:12px;font-weight:700">✓ Completed</span>`
+        ?`<span style="color:var(--gold);font-size:12px;font-weight:700">✓ Completed</span><button class="editbtn undobtn" data-catid="${cat.id}" style="color:var(--text3);font-size:11px;border-color:var(--border2);margin-left:6px">Undo</button>`
         :`<button class="completebtn" data-catid="${cat.id}" data-owner="${CUR.id}">✓ Mark Complete  +100pts</button>`;
       html+=`<div class="gcard${isDone?' goal-done':' goal-set'}">
         <div class="gcard-header">
-          <div class="gcard-ico" style="background:${cat.bg}">${cat.ico}</div>
+          <div class="gcard-ico" style="background:${cat.bg}">${dispIco}</div>
           <div style="flex:1">
-            <div class="gcard-title">${cat.id==='custom'&&g.cat_name?(g.cat_emoji||'✏️')+' '+g.cat_name:cat.lbl}</div>
+            <div class="gcard-title">${dispLbl}</div>
             <div class="gcard-status" style="color:${isDone?'var(--gold)':'var(--sky)'}">${isDone?'Completed':'Goal Set'}</div>
           </div>
           <button class="editbtn" data-catid="${cat.id}" data-owner="${CUR.id}">${isDone?'View':'Edit'}</button>
@@ -884,7 +901,8 @@ function saveGoal(){
   d.goals=d.goals||{};d.goals[CURCAT.id]=result;
   if(isNew){addPts(d,50,'Goal set: '+CURCAT.lbl);}
   bumpActivity(d);savePD(d);chkBadges(d);
-  if(isNew) addFeedPost({aid:CUR.id,txt:'set a new goal: '+CURCAT.ico+' '+CURCAT.lbl,ts:new Date().toISOString(),rx:[]});
+  const dispName=CURCAT.id.startsWith('custom')&&result.cat_name?(result.cat_emoji||'✏️')+' '+result.cat_name:CURCAT.ico+' '+CURCAT.lbl;
+  if(isNew) addFeedPost({aid:CUR.id,txt:'set a new goal: '+dispName,ts:new Date().toISOString(),rx:[]});
   toast(CURCAT.ico+' Saved!');
   ss('s-main');tabt('summer',document.getElementById('nav-summer'));renderDash();
 }
@@ -902,6 +920,14 @@ function completeGoal(catId,ownerId){
     addFeedPost({aid:CUR.id,txt:'completed their '+cat.ico+' '+cat.lbl+' goal!',ts:new Date().toISOString(),rx:[]});
     chkBadges(d);renderDash();
   }
+}
+function uncompleteGoal(catId){
+  const d=getPD(CUR.id);
+  if(!d.completedCats?.[catId]) return;
+  delete d.completedCats[catId];
+  d.points=Math.max(0,(d.points||0)-100);
+  d.badges=(d.badges||[]).filter(bid=>{const b=BADGES.find(x=>x.id===bid);return b?b.chk(d):true;});
+  savePD(d);toast('Goal uncompleted — 100 pts removed');renderDash();
 }
 function logA(type,pts){
   if(!CUR){toast('Please select your profile first');return;}
@@ -1070,6 +1096,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(e.target.classList.contains('avopt')){pickav(e.target,e.target.dataset.av||e.target.textContent);return}
     const catcard=e.target.closest('.catrow[data-catid]');if(catcard&&catcard.dataset.catid){openBuilder(catcard.dataset.catid);return}
     const emptycat=e.target.closest('.empty-cat[data-catid]');if(emptycat){openBuilder(emptycat.dataset.catid);return}
+    if(e.target.classList.contains('undobtn')){uncompleteGoal(e.target.dataset.catid);return}
     if(e.target.classList.contains('editbtn')){openBuilder(e.target.dataset.catid);return}
     if(e.target.classList.contains('completebtn')){completeGoal(e.target.dataset.catid,e.target.dataset.owner);return}
     if(e.target.classList.contains('logbtn')){logA(e.target.dataset.type,parseInt(e.target.dataset.pts));return}
