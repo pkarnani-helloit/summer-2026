@@ -1022,7 +1022,7 @@ async function resetAll(){
     return setDoc(doc(db,'profiles',p.id),fresh);
   }));
   await Promise.all(feedCache.map(item=>deleteDoc(doc(db,'feed',item.id)).catch(()=>{})));
-  await addFeedPost({aid:'papa',txt:"A Happy Father's Day gift from me to you! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]});
+  welcomeChecked=true;
   toast('Reset complete ✓');
   renderPapa();
 }
