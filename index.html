@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>2026 Summer to Remember</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -57,7 +57,7 @@ textarea.inp{resize:none}
 .nmunit{font-size:14px;color:var(--text2)}
 /* COUNTDOWN HERO - bigger */
 .cdhero{background:linear-gradient(150deg,#FFF0DB 0%,#FFE0C8 55%,#FFD6E8 100%);border-radius:26px;padding:32px 20px 28px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:var(--sh2)}
-.cdnum{font-family:'Sora',sans-serif;font-size:110px;font-weight:800;line-height:1;color:var(--coral);letter-spacing:-6px}
+.cdnum{font-family:'Sora',sans-serif;font-size:clamp(72px,22vw,110px);font-weight:800;line-height:1;color:var(--coral);letter-spacing:-4px}
 .cdword{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--text2);margin-top:4px}
 .cdsub{font-size:13px;color:var(--text3);margin-top:8px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
 .cddates{display:flex;justify-content:center;gap:8px;margin-top:16px}
@@ -127,7 +127,7 @@ textarea.inp{resize:none}
 /* LANDING */
 .lbody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;background:linear-gradient(160deg,#FFF8F0,#FFF0E6 50%,#E6F7FF)}
 .lsun{font-size:72px;margin-bottom:16px;animation:fl 3s ease-in-out infinite}
-.ltitle{font-family:'Sora',sans-serif;font-size:36px;font-weight:800;line-height:1.1;margin-bottom:14px}
+.ltitle{font-family:'Sora',sans-serif;font-size:clamp(28px,9vw,36px);font-weight:800;line-height:1.1;margin-bottom:14px}
 .lacc{color:var(--coral)}
 .lbtns{width:100%;display:flex;flex-direction:column;gap:12px}
 /* WHO */
@@ -328,6 +328,22 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     <div id="papakids"></div>
     <div class="slbl" style="margin-top:8px">Recent Activity</div>
     <div id="papafeed"></div>
+    <div style="margin-top:32px;padding:20px;background:#FFF0F0;border:1.5px solid var(--coral-l);border-radius:var(--r)">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--coral);margin-bottom:8px">Danger Zone</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Clears all goals, points, badges, and feed entries for everyone. Cannot be undone.</p>
+      <button class="btn" id="resetBtn" style="background:#fff;border:1.5px solid var(--coral);color:var(--coral);font-weight:700;padding:12px 20px">🗑 Reset Everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div id="reset-modal" style="position:fixed;inset:0;background:rgba(10,14,26,.7);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;padding:24px">
+  <div style="background:var(--surface);border-radius:24px;padding:32px 24px;width:100%;max-width:360px;box-shadow:var(--sh2);text-align:center">
+    <div style="font-size:44px;margin-bottom:12px">⚠️</div>
+    <div style="font-family:Sora,sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">Reset Everything?</div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.5">This will delete all goals, points, badges, and feed posts for Malina, Sasha, and Sam. This cannot be undone.</p>
+    <button class="btn btn-p" id="resetConfirmBtn" style="background:linear-gradient(135deg,var(--coral),#ff4444);margin-bottom:10px">Yes, Reset Everything</button>
+    <button class="btn btn-gh" id="resetCancelBtn">Cancel</button>
   </div>
 </div>
 
@@ -351,7 +367,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     <div style="font-size:40px;text-align:center;margin-bottom:16px">🔒</div>
     <div style="font-family:Sora,sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:6px" id="pin-title">Enter PIN</div>
     <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.5" id="pin-sub"></div>
-    <input type="number" inputmode="numeric" maxlength="4" class="inp" id="pin-input" placeholder="4-digit PIN" style="text-align:center;font-size:28px;letter-spacing:8px;font-family:'JetBrains Mono',monospace;margin-bottom:8px">
+    <input type="text" inputmode="numeric" pattern="\d*" maxlength="4" class="inp" id="pin-input" placeholder="_ _ _ _" style="text-align:center;font-size:28px;letter-spacing:8px;font-family:'JetBrains Mono',monospace;margin-bottom:8px">
     <div style="font-size:13px;color:var(--coral);text-align:center;margin-bottom:16px;min-height:18px" id="pin-error"></div>
     <button class="btn btn-p" id="pin-btn" data-mode="enter" data-pid="">Continue</button>
     <button class="btn btn-gh" style="margin-top:10px" id="pin-cancel-btn">Cancel</button>
@@ -362,7 +378,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, updateDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, updateDoc, query, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDP5lX6O8bfJtBQ4LsgWT0Bp-KAkuBoI8I",
@@ -411,7 +427,7 @@ function subscribeFeed(){
     feedCache=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(!welcomeChecked){
       welcomeChecked=true;
-      if(feedCache.length===0) addFeedPost({aid:'papa',txt:"Happy Father's Day! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]});
+      if(feedCache.length===0) addFeedPost({aid:'papa',txt:"A Happy Father's Day gift from me to you! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]});
     }
     renderFeed();
     if(document.getElementById('s-papa')?.classList.contains('active')) renderPapa();
@@ -422,7 +438,7 @@ const PROFS=[{id:'malina',name:'Malina',age:17},{id:'sasha',name:'Sasha',age:15}
 const NOTES={
   malina:"Dear Malina,\n\nThis is your last summer before a new chapter in your life begins. I want you to feel that, really feel it, and not scroll past it.\n\nI want this summer to be one you look back on with pride. One where you stayed productive, learned skills that will actually matter when you are on your own, and finished strong going into what will be a very short senior year before a giant leap forward to college.\n\nYou are more capable than you give yourself credit for. Learn to cook a few real meals. Get ahead on the SAT. Stay organized. And make time for Sasha and Sam, your friends, and most of all, have FUN!\n\nThis summer is a gift. Use it like one.\n\nI love you more than you know.\n\n❤️ Papa",
   sasha:"Dear Sasha,\n\nI am so excited for your summer. You have earned this break, and I want you to feel every bit of it.\n\nThis summer, I hope you will turn that energy toward the things that matter most to you. Your goals, your growth, your best life. Chase the cheer dream. Take care of your body. Nurture your friendships. And give yourself the gift of actually being present for all of it, one practice, one workout, one run, one hangout at a time.\n\nPut the phone down long enough to actually feel this summer. Walk with Sam. Make Malina laugh. Show up for yourself the way I know you can.\n\nI love you so much.\n\n❤️ Papa",
-  sam:"Dear Sam,\n\nI want to tell you something I mean completely: you are talented and skilled in ways that still amaze me. Summer had barely begun and you are already creating new things. I am not saying that because I am your Papa. I am saying it because it is true.\n\nThis is the summer to build. Not someday. This summer. One recipe, one bike ride, one knock on a neighbor's door at a time.\n\nYou have a big imagination and a good heart. Go use them. Make friends in the neighborhood. Ride further than you think you can. Get your hands dirty with flour, drumsticks, bike grease, craft supplies, whatever you are into. Tennis, drums, baking, biking, crafts and more, it is all up to you this summer.\n\nI believe in you more than you know. I love you.\n\n❤️ Papa"
+  sam:"Dear Sam,\n\nI want to tell you something I mean completely: you are talented and skilled in ways that still amaze me. Summer had barely begun and you are already creating new things. I am not saying that because I am your Papa. I am saying it because it is true.\n\nThis is the summer to build. Not someday. This summer. One recipe, one bike ride, one knock on a neighbor's door at a time. You have a big imagination and a good heart. Go use them. Make friends in the neighborhood. Ride further than you think you can. Get your hands dirty with flour, drumsticks, bike grease, craft supplies, whatever you are into. Tennis, drums, baking, biking, crafts and more, it is all up to you this summer.\n\nI believe in you more than you know. I love you.\n\n❤️ Papa"
 };
 
 const AVEMOJIS=['😎','🌟','🔥','⚡','🎯','🚀','🎨','🎵','🌈','🦁','🐯','🦊','🐧','🦋','🌻','🍀','💎','🏆','🎸','🏄'];
@@ -984,6 +1000,20 @@ async function renderPapa(){
   }).join(''):'<div style="font-size:13px;color:var(--text3);padding:8px 0">No activity yet. Summer starts now.</div>';
 }
 
+async function resetAll(){
+  document.getElementById('reset-modal').style.display='none';
+  toast('Resetting...');
+  await Promise.all(PROFS.map(p=>{
+    const fresh=defaultProfile(p.id);
+    CACHE[p.id]=fresh;
+    return setDoc(doc(db,'profiles',p.id),fresh);
+  }));
+  await Promise.all(feedCache.map(item=>deleteDoc(doc(db,'feed',item.id)).catch(()=>{})));
+  await addFeedPost({aid:'papa',txt:"A Happy Father's Day gift from me to you! This summer belongs to you three. 66 days. Make every one count.",ts:new Date().toISOString(),rx:[]});
+  toast('Reset complete ✓');
+  renderPapa();
+}
+
 // EVENTS
 document.addEventListener('DOMContentLoaded',()=>{
   signInAnonymously(auth)
@@ -1003,6 +1033,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('papainp').addEventListener('input',function(){upcode(this.value)});
   document.getElementById('papaEnterBtn').addEventListener('click',paplogin);
   document.getElementById('papaExitBtn').addEventListener('click',()=>ss('s-land'));
+  document.getElementById('resetBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='flex');
+  document.getElementById('resetCancelBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='none');
+  document.getElementById('resetConfirmBtn').addEventListener('click',resetAll);
   document.getElementById('shareBtn').addEventListener('click',openpost);
   document.getElementById('postCancelBtn').addEventListener('click',closepost);
   document.getElementById('postSubmitBtn').addEventListener('click',submitpost);
