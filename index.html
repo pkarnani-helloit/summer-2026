@@ -673,6 +673,12 @@ function bumpActivity(d){
     d.lastActivityDate=today;
   }
 }
+function effectiveStreak(d){
+  if(!d.lastActivityDate) return 0;
+  const today=new Date().toDateString();
+  const yest=new Date();yest.setDate(yest.getDate()-1);
+  return (d.lastActivityDate===today||d.lastActivityDate===yest.toDateString())?d.curStreak||0:0;
+}
 
 // WHO
 async function renderWho(){
@@ -799,7 +805,7 @@ function renderDash(){
   document.getElementById('dashstats').innerHTML=
     `<div class="statbox"><div class="statval" style="color:var(--coral)">${days}</div><div class="statlbl">Days Left</div></div>`+
     `<div class="statbox"><div class="statval" style="color:var(--gold)">${d.points}</div><div class="statlbl">Points</div></div>`+
-    `<div class="statbox"><div class="statval" style="color:var(--mint)">${d.curStreak||0} 🔥</div><div class="statlbl">Streak</div></div>`;
+    `<div class="statbox"><div class="statval" style="color:var(--mint)">${effectiveStreak(d)} 🔥</div><div class="statlbl">Streak</div></div>`;
   // Home cat rows with emojis
   document.getElementById('dashcats').innerHTML=getProfileCats(p.id,d).map(cat=>{
     const g=d.goals?.[cat.id],isDone=!!(d.completedCats?.[cat.id]);
@@ -960,8 +966,7 @@ function logA(type,pts){
   const map={book:()=>d.books=(d.books||0)+1,recipe:()=>d.recipes=(d.recipes||0)+1,workout:()=>d.workouts=(d.workouts||0)+1,dadrun:()=>d.workouts=(d.workouts||0)+1,screen:()=>d.screenFree=(d.screenFree||0)+1,sibling:()=>d.sibTime=(d.sibTime||0)+1,irl:()=>d.irl=(d.irl||0)+1,wellness:()=>d.wellness=(d.wellness||0)+1,earn:()=>d.earned=(d.earned||0)+1,custom:()=>d.customLogs=(d.customLogs||0)+1};
   if(map[type])map[type]();
   bumpActivity(d);addPts(d,pts,type+' logged');savePD(d);
-  document.getElementById('toppts').textContent=d.points+' pts';
-  renderBadges(d);const dd=getPD(CUR.id);renderSummerTab(dd);
+  renderDash();
 }
 
 // BADGES
@@ -1109,7 +1114,7 @@ async function renderPapa(){
         <div class="kidav">${d.avatar||'😎'}</div>
         <div style="flex:1">
           <div style="font-size:17px;font-weight:700">${p.name} ${pinStatus}</div>
-          <div style="font-size:12px;color:var(--text2);margin-top:2px">${d.points||0} pts · ${d.curStreak||0} day streak · ${filled.length}/${totalCats} goals · ${done} completed</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${d.points||0} pts · ${effectiveStreak(d)} day streak · ${filled.length}/${totalCats} goals · ${done} completed</div>
         </div>
         <button class="btn btn-gh btn-sm resetpinbtn" data-pid="${p.id}" style="font-size:11px;padding:6px 12px;flex-shrink:0">Reset PIN</button>
       </div>
