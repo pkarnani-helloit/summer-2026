@@ -199,7 +199,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
     </div>
     <div class="lbtns">
       <button class="btn btn-p" id="kidsBtn">I'm one of the kids ☀️</button>
-      <button class="btn btn-gh" id="papaBtn">I'm Papa</button>
+      <button class="btn btn-gh" id="papaBtn">I'm the Parent</button>
     </div>
   </div>
   <div style="padding:14px 14px calc(14px + env(safe-area-inset-bottom));text-align:center;font-size:12px;color:var(--text3)">Made with love for Malina, Sasha, and Sam</div>
@@ -316,21 +316,21 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
   <div class="scroll" style="padding-bottom:40px">
     <div style="text-align:center;padding:28px 0 20px">
       <div style="font-size:48px;margin-bottom:12px">👨‍👧‍👦</div>
-      <h2 style="font-size:24px;margin-bottom:6px">Papa's Dashboard</h2>
+      <h2 style="font-size:24px;margin-bottom:6px">Parent Dashboard</h2>
       <p style="font-size:14px;color:var(--text2)">Your private view of the summer.</p>
     </div>
     <label style="font-size:13px;color:var(--text2);font-weight:600;margin-bottom:7px;display:block">Enter your access code</label>
     <div class="codedisp" id="codedisp">_ _ _ _ _ _</div>
     <input type="text" class="inp" id="papainp" placeholder="KARNANI26" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:4px;font-size:18px;text-align:center;margin-bottom:16px">
     <button class="btn btn-g" id="papaEnterBtn">Enter &#8594;</button>
-    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:12px">Code: KARNANI26</p>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:12px">Code: 1980</p>
   </div>
 </div>
 
 <!-- PAPA DASHBOARD -->
 <div class="screen" id="s-papa">
   <div class="topbar">
-    <div class="top-name">👨‍👧‍👦 Papa's View</div>
+    <div class="top-name">👨‍👧‍👦 Parent View</div>
     <button class="bback" id="papaExitBtn">&#8592; Exit</button>
   </div>
   <div class="scroll">
@@ -348,7 +348,7 @@ h1{font-weight:800}h2{font-weight:700}h3{font-weight:600}
       <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--coral);margin-bottom:8px">Danger Zone</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Clears all goals, points, badges, and feed entries for everyone. Cannot be undone.</p>
       <button class="btn" id="resetBtn" style="background:#fff;border:1.5px solid var(--coral);color:var(--coral);font-weight:700;padding:12px 20px;margin-bottom:10px">🗑 Reset Everything</button>
-      <button class="btn btn-gh" id="resetPapaPin" style="font-size:13px;padding:11px 20px">🔑 Reset Papa PIN</button>
+      <button class="btn btn-gh" id="resetPapaPin" style="font-size:13px;padding:11px 20px">🔑 Reset Parent PIN</button>
     </div>
   </div>
 </div>
@@ -420,6 +420,7 @@ let papaCfg = {pin:'',pinSet:false};
 async function loadPapaCfg(){
   const snap=await getDoc(doc(db,'config','papa'));
   if(snap.exists()) papaCfg={...papaCfg,...snap.data()};
+  else{papaCfg={pin:'1980',pinSet:true};savePapaCfg();}
 }
 function savePapaCfg(){setDoc(doc(db,'config','papa'),papaCfg).catch(console.error);}
 
@@ -1043,13 +1044,13 @@ function submitpost(){
 // PAPA
 function upcode(v){document.getElementById('codedisp').textContent=v?v.toUpperCase():'_ _ _ _ _ _'}
 function paplogin(){
-  if(document.getElementById('papainp').value.trim().toUpperCase()==='KARNANI26'){
+  if(document.getElementById('papainp').value.trim()==='1980'){
     if(!papaCfg.pinSet){showPapaSetPin();}
     else{ss('s-papa');renderPapa();}
   } else toast('Wrong code.');
 }
 function showPapaSetPin(){
-  document.getElementById('pin-title').textContent='Set Your Papa PIN';
+  document.getElementById('pin-title').textContent='Set Your Parent PIN';
   document.getElementById('pin-sub').textContent='Choose a 4-digit PIN for future logins.';
   document.getElementById('pin-input').value='';
   document.getElementById('pin-btn').textContent='Set PIN';
@@ -1059,7 +1060,7 @@ function showPapaSetPin(){
   setTimeout(()=>document.getElementById('pin-input').focus(),100);
 }
 function showPapaEnterPin(){
-  document.getElementById('pin-title').textContent='Welcome, Papa';
+  document.getElementById('pin-title').textContent='Welcome, Parent';
   document.getElementById('pin-sub').textContent='Enter your 4-digit PIN to continue.';
   document.getElementById('pin-input').value='';
   document.getElementById('pin-btn').textContent='Enter';
@@ -1172,7 +1173,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('papaExitBtn').addEventListener('click',()=>ss('s-land'));
   document.getElementById('resetBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='flex');
   document.getElementById('resetCancelBtn').addEventListener('click',()=>document.getElementById('reset-modal').style.display='none');
-  document.getElementById('resetPapaPin').addEventListener('click',()=>{papaCfg={pin:'',pinSet:false};savePapaCfg();toast('Papa PIN cleared — use KARNANI26 next time');});
+  document.getElementById('resetPapaPin').addEventListener('click',()=>{papaCfg={pin:'1980',pinSet:true};savePapaCfg();toast('Parent PIN reset to 1980');});
   document.getElementById('resetConfirmBtn').addEventListener('click',resetAll);
   document.getElementById('shareBtn').addEventListener('click',openpost);
   document.getElementById('postCancelBtn').addEventListener('click',closepost);
